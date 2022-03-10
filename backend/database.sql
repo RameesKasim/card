@@ -7,5 +7,6 @@ create table CardTable(
     phone text unique,
     phonetwo text,
     email text unique,
-    linedin text unique
+    linedin text unique,
+    profileImage text
 )
