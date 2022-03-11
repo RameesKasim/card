@@ -2,11 +2,11 @@ create database CardDB;
 
 create table CardTable(
     card_id serial primary key,
-    username text,
+    name text unique ,
     designation text,
     phone text unique,
     phonetwo text,
     email text unique,
-    linedin text unique,
+    linkedin text unique,
     profileImage text
-)
+);

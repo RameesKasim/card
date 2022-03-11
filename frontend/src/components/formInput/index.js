@@ -3,7 +3,6 @@ import { TextField, FormControl, Button } from "@mui/material";
 import { ErrorMessage } from "formik";
 import MuiPhoneNumber from "mui-phone-number";
 import defaultUser from "../../assets/defaultUser.jpg";
-import * as Yup from "yup";
 import "yup-phone";
 
 export const renderInput = ({ field, form, ...props }) => {
@@ -42,9 +41,6 @@ export const renderImageUpload = ({ field, form, selectedImage, ...props }) => {
         // {...field}
         type="file"
         onChange={(event) => {
-          console.log(event.currentTarget.files[0]);
-          console.log(event.currentTarget.files);
-          console.log(form.values)
           event.currentTarget.files.length > 0 &&
             form.setFieldValue(props.id, event.currentTarget.files[0]);
             props.readURL(event.currentTarget);

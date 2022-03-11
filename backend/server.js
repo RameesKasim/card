@@ -6,10 +6,10 @@ const pool = require("./db");
 const app = express();
 
 var storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: (req, file, cb) => {
     cb(null, "./uploads");
   },
-  filename: function (req, file, cb) {
+  filename: (req, file, cb) => {
     cb(null, req.body.name + path.extname(file.originalname));
   },
 });
@@ -18,18 +18,38 @@ const upload = multer({ storage: storage });
 
 app.use(cors());
 
+//generating a static url
+
 app.use("/uploads", express.static("./uploads"));
+
+//saving data to database
 
 app.post("/", upload.single("file"), async (req, res) => {
   try {
+    var vCardsJS = require("vcards-js");
+
+    const mycard = vCardsJS();
+
     const { name, designation, email, phone, phoneTwo, linkedin } = req.body;
     const filename = req.file ? name + path.extname(req.file.originalname) : "";
+
     const result = await pool.query(
       "INSERT INTO cardtable(name, designation,phone,phonetwo,email,linkedin,profileimage)VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING name;",
       [name, designation, phone, phoneTwo, email, linkedin, filename]
     );
+
+    mycard.email = email;
+    mycard.cellPhone = phone;
+    mycard.homePhone = phoneTwo;
+    mycard.lastName = name;
+    mycard.title = designation;
+    mycard.url = `https://www.linkedin.com/in/${linkedin}`;
+    mycard.socialUrls["linkedIn"] = `https://www.linkedin.com/in/${linkedin}`;
+    req.file && mycard.photo.embedFromFile(`./uploads/${filename}`);
+
+    mycard.saveToFile(`./vcards/${name}.vcf`);
+
     res.status(200).json(result.rows[0]);
-    console.log(newid);
   } catch (error) {
     const errorString = error.detail;
     let msg = "";
@@ -51,15 +71,24 @@ app.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
+app.get("/vcard/:name", async (req, res) => {
+  try {
+    const { name } = req.params;
+    res.download(`./vcards/${name}.vcf`);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//retrieving data
+
 app.get("/:name", async (req, res) => {
   try {
     const { name } = req.params;
-    console.log(name);
     const details = await pool.query(
       "SELECT * FROM cardtable where name = $1",
       [name]
     );
-    console.log(details);
 
     res.status(200).json(details.rows[0]);
   } catch (error) {

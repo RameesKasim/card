@@ -1,5 +1,5 @@
 import { React, useEffect, useState } from "react";
-import { Box, Paper } from "@mui/material";
+import { Box, Paper, Button } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
@@ -8,7 +8,9 @@ import CallIcon from "@mui/icons-material/Call";
 import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import axios from "axios";
 import companyLogo from "../../images/logo.png";
+import defaultImage from "../../images/defaultProfile.png";
 import Loader from "../loader";
+import { saveAs } from "file-saver";
 
 const useStyles = makeStyles({
   mainWrapper: {
@@ -39,6 +41,7 @@ const useStyles = makeStyles({
   headImage: {
     borderRadius: "50%",
     width: "7rem",
+    height: "7rem",
     position: "absolute",
     left: "33%",
     top: "15%",
@@ -86,7 +89,10 @@ const useStyles = makeStyles({
   },
   leftContent: {
     width: "75%",
-    wordBreak: "break-all",
+  },
+  btnWrapper: {
+    display: "flex",
+    justifyContent: "center",
   },
 });
 
@@ -109,17 +115,29 @@ const Card = (props) => {
   }, []);
 
   useEffect(() => {
-    console.log(name.name);
     axios
       .get(`http://localhost:5000/${name.name}`)
       .then((res) => {
-        console.log(res);
         setCardDetails(res.data);
       })
       .catch((error) => {
         console.log(error);
       });
   }, []);
+
+  const downloadVcard = () => {
+    axios
+      .get(`http://localhost:5000/vcard/${name.name}`)
+      .then((res) => {
+        let file = new File([res.data], `${name.name}.vcf`, {
+          type: "text/plain;charset=utf-8",
+        });
+        saveAs(file);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   return (
     <Box className={classes.mainWrapper}>
@@ -133,7 +151,11 @@ const Card = (props) => {
             </div>
             <img
               className={classes.headImage}
-              src={`http://localhost:5000/uploads/${cardDetails.profileimage}`}
+              src={
+                cardDetails.profileimage.length
+                  ? `http://localhost:5000/uploads/${cardDetails.profileimage}`
+                  : defaultImage
+              }
             />
             <div
               style={{ fontSize: ".6rem", color: "white", fontWeight: "600" }}
@@ -193,6 +215,11 @@ const Card = (props) => {
             <div className={classes.rightContent}>
               <QRCode value={url} size={80} />
             </div>
+          </div>
+          <div className={classes.btnWrapper}>
+            <Button variant="contained" onClick={downloadVcard}>
+              Add to Contacts
+            </Button>
           </div>
         </Paper>
       )}

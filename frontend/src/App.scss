@@ -11,16 +11,13 @@
     font-weight: 600 !important;
     color: #090923 !important;
     text-transform: uppercase !important;
+    &:hover {
+      color: #0fbeff !important;
+    }
   }
 
   .submit-button {
-    background-color: #35bf62 !important;
-    color: #fff !important;
     border: 0 !important;
-    &:hover {
-      background-color: #35bf62 !important;
-      color: #0fbeff !important;
-    }
   }
 }
 

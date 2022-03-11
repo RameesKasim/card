@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { renderImageUpload, renderPhone, renderInput } from "../formInput";
 import Loader from "../loader";
-import defaultUser from "../../assets/defaultUser.jpg";
 
 const validations = Yup.object().shape({
   name: Yup.string().required("Enter  your name"),
