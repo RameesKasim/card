@@ -1,19 +1,52 @@
+@media only screen and (max-device-width: 700px) {
+  .formWrapper {
+    padding: 2.2%;
+    width: 90%;
+    margin: 3% 0px;
+    border-radius: 12px !important;
+  }
+  .MuiInputBase-root {
+    width: 100% !important;
+  }
+}
+
+@media only screen and (max-device-width: 480px) {
+  .cardWrapper {
+    min-height: fit-content;
+    width: 100%;
+    .MuiPaper-root {
+      margin: 0% !important;
+      padding-bottom: 5%;
+      border-radius: 0% !important;
+      img {
+        top: -44px;
+      }
+    }
+  }
+}
+
+@media only screen and (min-device-width: 480px) {
+  .cardWrapper {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+    justify-content: center;
+  }
+}
+
+@media only screen and (min-device-width: 700px) {
+  .formWrapper {
+    padding: 2.2%;
+    width: 70%;
+    margin: 3% 0px;
+    border-radius: 12px !important;
+  }
+}
+
 .submit-inner {
   button {
     margin-left: 10px !important;
-    min-width: 110px !important;
-    margin-top: 10px !important;
-    border-radius: 5px !important;
-    box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
-      0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 1px 5px 0px rgba(0, 0, 0, 0.12);
-    max-height: 40px !important;
-    font-size: 14px !important;
-    font-weight: 600 !important;
-    color: #090923 !important;
-    text-transform: uppercase !important;
-    &:hover {
-      color: #0fbeff !important;
-    }
   }
 
   .submit-button {

@@ -43,7 +43,7 @@ export const renderImageUpload = ({ field, form, selectedImage, ...props }) => {
         onChange={(event) => {
           event.currentTarget.files.length > 0 &&
             form.setFieldValue(props.id, event.currentTarget.files[0]);
-            props.readURL(event.currentTarget);
+          props.readURL(event.currentTarget);
         }}
       />
       <label htmlFor={props.id}>
@@ -51,16 +51,14 @@ export const renderImageUpload = ({ field, form, selectedImage, ...props }) => {
           <img
             src={selectedImage || defaultUser}
             height="100rem"
-            style={{ position: "absolute", left: "0%", cursor: "pointer" }}
+            width="100rem"
+            style={{ cursor: "pointer" }}
             alt=""
           />
           <div
             style={{
-              position: "absolute",
               textTransform: "initial",
               color: "rgba(0, 0, 0, 0.6)",
-              left: "2%",
-              top: "99%",
             }}
           >
             Upload Image

@@ -10,14 +10,18 @@ import { renderImageUpload, renderPhone, renderInput } from "../formInput";
 import Loader from "../loader";
 
 const validations = Yup.object().shape({
-  name: Yup.string().required("Enter  your name"),
+  name: Yup.string().required("Name required"),
   designation: Yup.string().required("Designation required"),
   email: Yup.string()
-    .required("Email required")
+    .required("Email  required")
     .email("Enter a valid email address"),
   phone: Yup.string()
     .required("Phone required ")
     .phone("", "", "Enter a valid phone number"),
+  whatsapp: Yup.string()
+    .required("Whatsapp number required ")
+    .phone("", "", "Enter a valid phone number"),
+  qualification: Yup.string().required("Qualification  required"),
   linkedin: Yup.string().required("Linkedin id required"),
 });
 
@@ -41,8 +45,9 @@ const Home = (props) => {
     formData.append("name", values.name);
     formData.append("designation", values.designation);
     formData.append("email", values.email);
+    formData.append("whatsapp", values.whatsapp);
     formData.append("phone", values.phone);
-    formData.append("phoneTwo", values.phone2);
+    formData.append("qualification", values.qualification);
     formData.append("linkedin", values.linkedin);
     formData.append("file", values.profileImage);
     await axios
@@ -59,6 +64,8 @@ const Home = (props) => {
           actions.setFieldError("email", errorMesssage);
         errorMesssage.includes("Phone") &&
           actions.setFieldError("phone", errorMesssage);
+        errorMesssage.includes("whatsapp") &&
+          actions.setFieldError("whatsapp", errorMesssage);
         errorMesssage.includes("Linkedin") &&
           actions.setFieldError("linkedin", errorMesssage);
         setIdError(error.data.detail);
@@ -83,7 +90,8 @@ const Home = (props) => {
       name: "",
       designation: "",
       phone: "",
-      phone2: "",
+      whatsapp: "",
+      qualification: "",
       email: "",
       linkedin: "",
     });
@@ -109,7 +117,7 @@ const Home = (props) => {
           {(props) => (
             <Form>
               <Box className={classes.form}>
-                <Paper elivation={2} className={classes.wrapper}>
+                <Paper elivation={12} className="formWrapper">
                   <div className={classes.headWrapper}>
                     <Box
                       display={{ xs: "block", sm: "flex" }}
@@ -120,7 +128,14 @@ const Home = (props) => {
                       style={{ marginBottom: "10px" }}
                     >
                       <Grid container spacing={2}>
-                        <Grid item xs={12} sm={12} md={6} lg={6}>
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          md={6}
+                          lg={6}
+                          className={classes.textWrapper}
+                        >
                           <Field
                             name="name"
                             type="text"
@@ -128,8 +143,6 @@ const Home = (props) => {
                             label="Name"
                             component={renderInput}
                           />
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={6} lg={6}>
                           <Field
                             name="designation"
                             type="text"
@@ -138,21 +151,39 @@ const Home = (props) => {
                             component={renderInput}
                           />
                         </Grid>
+                        <Grid
+                          item
+                          xs={12}
+                          sm={12}
+                          md={6}
+                          lg={6}
+                          className={classes.imageWrapper}
+                        >
+                          <Field
+                            name="profileImage"
+                            id="profileImage"
+                            className={classes.formControl}
+                            inputClass={classes.hiddenInput}
+                            component={renderImageUpload}
+                            readURL={readURL}
+                            selectedImage={image}
+                          />
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={6} lg={6}>
+                          <Field
+                            name="whatsapp"
+                            type="text"
+                            className={classes.formControlPhone}
+                            label="Whatsapp"
+                            component={renderPhone}
+                          />
+                        </Grid>
                         <Grid item xs={12} sm={12} md={6} lg={6}>
                           <Field
                             name="phone"
                             type="text"
                             className={classes.formControlPhone}
                             label="Phone"
-                            component={renderPhone}
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={6} lg={6}>
-                          <Field
-                            name="phone2"
-                            type="text"
-                            className={classes.formControlPhone}
-                            label="Tel"
                             component={renderPhone}
                           />
                         </Grid>
@@ -176,13 +207,11 @@ const Home = (props) => {
                         </Grid>
                         <Grid item xs={12} sm={12} md={6} lg={6}>
                           <Field
-                            name="profileImage"
-                            id="profileImage"
+                            name="qualification"
+                            type="text"
                             className={classes.formControl}
-                            inputClass={classes.hiddenInput}
-                            component={renderImageUpload}
-                            readURL={readURL}
-                            selectedImage={image}
+                            label="Qualificaion"
+                            component={renderInput}
                           />
                         </Grid>
                         <Grid item xs={12} sm={12} md={12} lg={12}>
@@ -246,13 +275,6 @@ const useStyles = makeStyles({
     color: "#e61414",
     fontSize: "12px",
   },
-  wrapper: {
-    padding: "2.2%",
-    width: "70%",
-    boxShadow: "0 0 20px 0 rgba(20, 92, 117, 0.3)",
-    margin: "3% 0px",
-    borderRadius: "12px",
-  },
   formControl: {
     marginTop: "24px",
     minWidth: "160",
@@ -264,10 +286,14 @@ const useStyles = makeStyles({
       borderRadius: "10px",
     },
     "&  .MuiButtonBase-root": {
-      width: "46%",
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
       border: "0px",
-      height: "6rem",
-      cursor: "default",
+      height: "fit-content",
+      boxShadow: "none",
       "&:hover": {
         border: "0px",
         background: "none",
@@ -295,6 +321,16 @@ const useStyles = makeStyles({
       width: "96%",
       borderRadius: "10px",
     },
+  },
+  textWrapper: {
+    display: "flex",
+    flexDirection: "column !important",
+    justifyContent: "space-around",
+    height: "190px",
+  },
+  imageWrapper: {
+    display: "flex",
+    alignItems: "center",
   },
 });
 

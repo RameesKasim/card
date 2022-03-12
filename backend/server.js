@@ -30,19 +30,37 @@ app.post("/", upload.single("file"), async (req, res) => {
 
     const mycard = vCardsJS();
 
-    const { name, designation, email, phone, phoneTwo, linkedin } = req.body;
+    const {
+      name,
+      designation,
+      email,
+      phone,
+      whatsapp,
+      qualification,
+      linkedin,
+    } = req.body;
     const filename = req.file ? name + path.extname(req.file.originalname) : "";
 
     const result = await pool.query(
-      "INSERT INTO cardtable(name, designation,phone,phonetwo,email,linkedin,profileimage)VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING name;",
-      [name, designation, phone, phoneTwo, email, linkedin, filename]
+      "INSERT INTO cardtable(name, designation,phone,whatsapp,email,linkedin,profileimage,qualification)VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING name;",
+      [
+        name,
+        designation,
+        phone,
+        whatsapp,
+        email,
+        linkedin,
+        filename,
+        qualification,
+      ]
     );
 
     mycard.email = email;
     mycard.cellPhone = phone;
-    mycard.homePhone = phoneTwo;
+    mycard.whatsapp = whatsapp;
     mycard.lastName = name;
     mycard.title = designation;
+    mycard.qualification = qualification;
     mycard.url = `https://www.linkedin.com/in/${linkedin}`;
     mycard.socialUrls["linkedIn"] = `https://www.linkedin.com/in/${linkedin}`;
     req.file && mycard.photo.embedFromFile(`./uploads/${filename}`);
@@ -57,6 +75,8 @@ app.post("/", upload.single("file"), async (req, res) => {
       errorString.includes("name") && (msg = "User already exits");
       errorString.includes("email") && (msg = "Email already exits");
       errorString.includes("phone") && (msg = "Phone number already exits");
+      errorString.includes("whatsapp") &&
+        (msg = "WhatsApp number already exits");
       errorString.includes("linkedin") && (msg = "Linkedin id already exits");
     } else msg = "Data already exist";
 
