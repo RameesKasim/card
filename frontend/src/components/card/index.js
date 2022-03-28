@@ -3,7 +3,13 @@ import { Box, Paper, Button } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
-import { FaPhoneAlt, FaWhatsapp, FaLinkedin, FaEnvelope } from "react-icons/fa";
+import {
+  FaPhoneAlt,
+  FaWhatsapp,
+  FaLinkedin,
+  FaEnvelope,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
 import axios from "axios";
 import companyLogo from "../../images/logo.png";
 import defaultImage from "../../images/defaultProfile.png";
@@ -78,6 +84,7 @@ const useStyles = makeStyles({
     cursor: "pointer",
     textDecoration: "none",
     alignItems: "center",
+    minHeight: "50px",
   },
   iconWrapper: {
     height: "40px",
@@ -98,12 +105,16 @@ const useStyles = makeStyles({
     marginLeft: ".875rem",
     fontSize: "1rem",
     color: "black",
-    fontWeight: "700",
+    fontWeight: "300",
+    lineHeight: "1.4",
+    whiteSpace: "pre-wrap",
+    wordBreak: "break-word",
   },
   subString: {
-    color: "#0000004d",
-    lineHeight: ".9rem",
-    fontSize: ".7rem",
+    color: "#525f66",
+    lineHeight: "1rem",
+    fontSize: ".87rem",
+    fontWeight: "200",
   },
   btnWrapper: {
     display: "flex",
@@ -126,6 +137,8 @@ const Card = (props) => {
   const whatsappLink = `https:wa.me/${cardDetails.whatsapp}`;
   const phoneLink = `tel:${cardDetails.phone}`;
   const linkedinLink = `https:linkedin.com/in/${cardDetails.linkedin}`;
+  const location = "10th Floor Capricorn Tower, \nSheikh Zayed Road Dubai";
+  const locationLink = `http://maps.google.com/maps?q=Capricorn Tower+Dubai`;
 
   useEffect(() => {
     setIsLoading(true);
@@ -193,17 +206,21 @@ const Card = (props) => {
               </div>
               <div className={classes.detail}>
                 {cardDetails.email}
-                <div className={classes.subString}>connect to me</div>
+                <div className={classes.subString}>Drop me an email</div>
               </div>
               {}
             </a>
-            <a href={whatsappLink} className={classes.LinkWrapper}>
+            <a
+              href={whatsappLink}
+              target="_blank"
+              className={classes.LinkWrapper}
+            >
               <div className={classes.iconWrapper}>
                 <FaWhatsapp />
               </div>
               <div className={classes.detail}>
                 {cardDetails.whatsapp}
-                <div className={classes.subString}>connect to me</div>
+                <div className={classes.subString}>Whatsapp me</div>
               </div>
             </a>
             <a href={phoneLink} className={classes.LinkWrapper}>
@@ -212,7 +229,7 @@ const Card = (props) => {
               </div>
               <div className={classes.detail}>
                 {cardDetails.phone}
-                <div className={classes.subString}>connect to me</div>
+                <div className={classes.subString}>Drop me a line</div>
               </div>
             </a>
             <a
@@ -225,7 +242,20 @@ const Card = (props) => {
               </div>
               <div className={classes.detail}>
                 {cardDetails.linkedin}
-                <div className={classes.subString}>connect to me</div>
+                <div className={classes.subString}>Lets connect</div>
+              </div>
+            </a>
+            <a
+              href={locationLink}
+              target="_blank"
+              className={classes.LinkWrapper}
+            >
+              <div className={classes.iconWrapper}>
+                <FaMapMarkerAlt />
+              </div>
+              <div className={classes.detail}>
+                {location}
+                <div className={classes.subString}>Visit us</div>
               </div>
             </a>
           </div>

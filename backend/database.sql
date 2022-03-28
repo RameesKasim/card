@@ -2,10 +2,10 @@ create database CardDB;
 
 create table CardTable(
     card_id serial primary key,
-    name text unique ,
+    name text unique,
     designation text,
     phone text unique,
-    phonetwo text,
+    whatsapp text unique,
     email text unique,
     linkedin text unique,
     profileImage text

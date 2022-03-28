@@ -57,7 +57,7 @@ app.post("/", upload.single("file"), async (req, res) => {
 
     mycard.email = email;
     mycard.cellPhone = phone;
-    mycard.whatsapp = whatsapp;
+    mycard.workPhone = whatsapp;
     mycard.lastName = name;
     mycard.title = designation;
     mycard.qualification = qualification;
