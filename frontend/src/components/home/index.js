@@ -21,8 +21,6 @@ const validations = Yup.object().shape({
   whatsapp: Yup.string()
     .required("Whatsapp number required ")
     .phone("", "", "Enter a valid phone number"),
-  qualification: Yup.string().required("Qualification  required"),
-  linkedin: Yup.string().required("Linkedin id required"),
 });
 
 const Home = (props) => {
@@ -47,7 +45,6 @@ const Home = (props) => {
     formData.append("email", values.email);
     formData.append("whatsapp", values.whatsapp);
     formData.append("phone", values.phone);
-    formData.append("qualification", values.qualification);
     formData.append("linkedin", values.linkedin);
     formData.append("file", values.profileImage);
     await axios
@@ -71,7 +68,6 @@ const Home = (props) => {
         setIdError(error.data.detail);
       });
   };
-  const handleReset = (values, actions) => {};
 
   const readURL = (input) => {
     if (input.files && input.files[0]) {
@@ -91,7 +87,6 @@ const Home = (props) => {
       designation: "",
       phone: "",
       whatsapp: "",
-      qualification: "",
       email: "",
       linkedin: "",
     });
@@ -202,15 +197,6 @@ const Home = (props) => {
                             type="text"
                             className={classes.formControl}
                             label="Linkedin ID"
-                            component={renderInput}
-                          />
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={6} lg={6}>
-                          <Field
-                            name="qualification"
-                            type="text"
-                            className={classes.formControl}
-                            label="Qualificaion"
                             component={renderInput}
                           />
                         </Grid>
