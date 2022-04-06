@@ -10,7 +10,7 @@ var storage = multer.diskStorage({
     cb(null, "./uploads");
   },
   filename: (req, file, cb) => {
-    cb(null, req.body.name + path.extname(file.originalname));
+    cb(null, req.body.name + ".png");
   },
 });
 
@@ -30,29 +30,12 @@ app.post("/", upload.single("file"), async (req, res) => {
 
     const mycard = vCardsJS();
 
-    const {
-      name,
-      designation,
-      email,
-      phone,
-      whatsapp,
-      qualification,
-      linkedin,
-    } = req.body;
-    const filename = req.file ? name + path.extname(req.file.originalname) : "";
+    const { name, designation, email, phone, whatsapp, linkedin } = req.body;
+    const filename = req.file ? name + ".png" : "";
 
     const result = await pool.query(
-      "INSERT INTO cardtable(name, designation,phone,whatsapp,email,linkedin,profileimage,qualification)VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING name;",
-      [
-        name,
-        designation,
-        phone,
-        whatsapp,
-        email,
-        linkedin,
-        filename,
-        qualification,
-      ]
+      "INSERT INTO cardtable(name, designation,phone,whatsapp,email,linkedin,profileimage)VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING name;",
+      [name, designation, phone, whatsapp, email, linkedin, filename]
     );
 
     mycard.email = email;
@@ -60,7 +43,6 @@ app.post("/", upload.single("file"), async (req, res) => {
     mycard.workPhone = whatsapp;
     mycard.lastName = name;
     mycard.title = designation;
-    mycard.qualification = qualification;
     mycard.url = `https://www.linkedin.com/in/${linkedin}`;
     mycard.socialUrls["linkedIn"] = `https://www.linkedin.com/in/${linkedin}`;
     req.file && mycard.photo.embedFromFile(`./uploads/${filename}`);
@@ -110,6 +92,7 @@ app.get("/:name", async (req, res) => {
       [name]
     );
 
+    console.log(name, details);
     res.status(200).json(details.rows[0]);
   } catch (error) {
     console.log(error);

@@ -65,17 +65,17 @@ const useStyles = makeStyles({
   },
   qualification: {
     width: "fit-content",
-    padding: ".5rem .5rem",
+    padding: ".2rem .2rem",
     fontSize: ".875rem",
     lineHeight: "1",
     fontWeight: "500",
-    marginBottom: "1.5rem",
-    background: "#e6e8ea",
+    marginBottom: "1rem",
+    // background: "#e6e8ea",
     borderRadius: ".25rem",
     transition: "background .2s 0s ease",
     marginTop: ".5rem",
     "&:hover": {
-      backgroundColor: "#ACB9BE",
+      // backgroundColor: "#ACB9BE",
     },
   },
   LinkWrapper: {
@@ -182,11 +182,16 @@ const Card = (props) => {
             <QRCode value={url} size={150} />
           </div>
           <div className={classes.titleWrapper}>
-            <img src={companyLogo} style={{ width: "100%" }} />
+            <img
+              alt="company logo"
+              src={companyLogo}
+              style={{ width: "100%" }}
+            />
           </div>
           <div className={classes.imageWrapper}>
             <img
               className={classes.headImage}
+              alt="profile pic"
               src={
                 cardDetails.profileimage.length
                   ? `http://localhost:5000/uploads/${cardDetails.profileimage}`
@@ -197,9 +202,7 @@ const Card = (props) => {
           <div className={classes.contentWrapper}>
             <div className={classes.name}>{cardDetails.name}</div>
             <div className={classes.designation}>{cardDetails.designation}</div>
-            <div className={classes.qualification}>
-              {cardDetails.qualification}
-            </div>
+            <div className={classes.qualification}></div>
             <a href={emailLink} className={classes.LinkWrapper}>
               <div className={classes.iconWrapper}>
                 <FaEnvelope />
@@ -232,19 +235,22 @@ const Card = (props) => {
                 <div className={classes.subString}>Drop me a line</div>
               </div>
             </a>
-            <a
-              href={linkedinLink}
-              target="_blank"
-              className={classes.LinkWrapper}
-            >
-              <div className={classes.iconWrapper}>
-                <FaLinkedin />
-              </div>
-              <div className={classes.detail}>
-                {cardDetails.linkedin}
-                <div className={classes.subString}>Lets connect</div>
-              </div>
-            </a>
+            {cardDetails.linkedin.length > 0 && (
+              <a
+                href={linkedinLink}
+                target="_blank"
+                className={classes.LinkWrapper}
+              >
+                <div className={classes.iconWrapper}>
+                  <FaLinkedin />
+                </div>
+
+                <div className={classes.detail}>
+                  {cardDetails.linkedin}
+                  <div className={classes.subString}>Lets connect</div>
+                </div>
+              </a>
+            )}
             <a
               href={locationLink}
               target="_blank"
