@@ -182,11 +182,16 @@ const Card = (props) => {
             <QRCode value={url} size={150} />
           </div>
           <div className={classes.titleWrapper}>
-            <img src={companyLogo} style={{ width: "100%" }} />
+            <img
+              alt="company logo"
+              src={companyLogo}
+              style={{ width: "100%" }}
+            />
           </div>
           <div className={classes.imageWrapper}>
             <img
               className={classes.headImage}
+              alt="profile pic"
               src={
                 cardDetails.profileimage.length
                   ? `http://localhost:5000/uploads/${cardDetails.profileimage}`

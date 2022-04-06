@@ -10,7 +10,7 @@ var storage = multer.diskStorage({
     cb(null, "./uploads");
   },
   filename: (req, file, cb) => {
-    cb(null, req.body.name + path.extname(file.originalname));
+    cb(null, req.body.name + ".png");
   },
 });
 
@@ -31,7 +31,7 @@ app.post("/", upload.single("file"), async (req, res) => {
     const mycard = vCardsJS();
 
     const { name, designation, email, phone, whatsapp, linkedin } = req.body;
-    const filename = req.file ? name + path.extname(req.file.originalname) : "";
+    const filename = req.file ? name + ".png" : "";
 
     const result = await pool.query(
       "INSERT INTO cardtable(name, designation,phone,whatsapp,email,linkedin,profileimage)VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING name;",

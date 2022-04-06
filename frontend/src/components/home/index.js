@@ -1,5 +1,5 @@
-import React, { Fragment, useState, useEffect } from "react";
-import { Paper, Button, Grid, Box } from "@mui/material";
+import React, { Fragment, useState, useEffect, useRef } from "react";
+import { Paper, Button, Grid, Box, Dialog, Slider } from "@mui/material";
 import { makeStyles } from "@mui/styles";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { renderImageUpload, renderPhone, renderInput } from "../formInput";
 import Loader from "../loader";
+import AvatarEditor from "react-avatar-editor";
 
 const validations = Yup.object().shape({
   name: Yup.string().required("Name required"),
@@ -30,15 +31,31 @@ const Home = (props) => {
   const navigate = useNavigate();
   const [idError, setIdError] = useState([]);
   const [image, setImage] = useState("");
+  const [open, setOpen] = useState(false);
+  const [zoomValue, setZoomValue] = useState(1);
+  const [editorImage, setEditorImage] = useState("");
 
   useEffect(() => {
     setIsLoading(true);
+    setImage("");
     setTimeout(() => {
       setIsLoading(false);
     }, 2000);
   }, []);
 
   const handleSubmit = async (values, actions) => {
+    const dataURLtoBlob = (dataurl) => {
+      var arr = dataurl.split(","),
+        mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]),
+        n = bstr.length,
+        u8arr = new Uint8Array(n);
+      console.log(mime);
+      while (n--) {
+        u8arr[n] = bstr.charCodeAt(n);
+      }
+      return new Blob([u8arr], { type: mime, name: "profilePic.png'" });
+    };
     let formData = new FormData();
     formData.append("name", values.name);
     formData.append("designation", values.designation);
@@ -46,7 +63,7 @@ const Home = (props) => {
     formData.append("whatsapp", values.whatsapp);
     formData.append("phone", values.phone);
     formData.append("linkedin", values.linkedin);
-    formData.append("file", values.profileImage);
+    formData.append("file", dataURLtoBlob(image));
     await axios
       .post("http://localhost:5000/", formData)
       .then((res) => {
@@ -61,7 +78,7 @@ const Home = (props) => {
           actions.setFieldError("email", errorMesssage);
         errorMesssage.includes("Phone") &&
           actions.setFieldError("phone", errorMesssage);
-        errorMesssage.includes("whatsapp") &&
+        errorMesssage.includes("WhatsApp") &&
           actions.setFieldError("whatsapp", errorMesssage);
         errorMesssage.includes("Linkedin") &&
           actions.setFieldError("linkedin", errorMesssage);
@@ -79,6 +96,29 @@ const Home = (props) => {
 
       reader.readAsDataURL(input.files[0]);
     }
+  };
+
+  const imageSelected = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
+  const handleZoom = (event, newValue) => {
+    setZoomValue(newValue);
+  };
+
+  const setEditor = (value) => {
+    setEditorImage(value);
+  };
+
+  const handleImageEdit = () => {
+    const canvasScaled = editorImage.getImageScaledToCanvas();
+    const croppedImg = canvasScaled.toDataURL();
+    setImage(croppedImg);
+    setOpen(false);
   };
 
   useEffect(() => {
@@ -113,6 +153,39 @@ const Home = (props) => {
             <Form>
               <Box className={classes.form}>
                 <Paper elivation={12} className="formWrapper">
+                  <Dialog open={open} onClose={handleClose}>
+                    <Paper className={classes.avatarEditorWrapper}>
+                      <AvatarEditor
+                        image={image}
+                        width={200}
+                        height={200}
+                        border={0}
+                        color={[255, 255, 255, 0.6]}
+                        scale={zoomValue}
+                        ref={setEditor}
+                      />
+                      <Slider
+                        aria-label="Zoom"
+                        size="small"
+                        defaultValue={1}
+                        min={1}
+                        max={2}
+                        step={0.1}
+                        onChange={handleZoom}
+                        style={{ width: "85%" }}
+                      />
+                      <div>
+                        <Button
+                          variant="contained"
+                          className={classes.imageButton}
+                          type="submit"
+                          onClick={handleImageEdit}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                    </Paper>
+                  </Dialog>
                   <div className={classes.headWrapper}>
                     <Box
                       display={{ xs: "block", sm: "flex" }}
@@ -159,6 +232,7 @@ const Home = (props) => {
                             id="profileImage"
                             className={classes.formControl}
                             inputClass={classes.hiddenInput}
+                            imageSelected={imageSelected}
                             component={renderImageUpload}
                             readURL={readURL}
                             selectedImage={image}
@@ -317,6 +391,16 @@ const useStyles = makeStyles({
   imageWrapper: {
     display: "flex",
     alignItems: "center",
+  },
+  avatarEditorWrapper: {
+    padding: "1rem",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  imageButton: {
+    lineHeight: ".51rem",
+    padding: "12px 26px !important",
   },
 });
 

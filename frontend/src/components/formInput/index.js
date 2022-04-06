@@ -41,9 +41,8 @@ export const renderImageUpload = ({ field, form, selectedImage, ...props }) => {
         // {...field}
         type="file"
         onChange={(event) => {
-          event.currentTarget.files.length > 0 &&
-            form.setFieldValue(props.id, event.currentTarget.files[0]);
           props.readURL(event.currentTarget);
+          props.imageSelected();
         }}
       />
       <label htmlFor={props.id}>
