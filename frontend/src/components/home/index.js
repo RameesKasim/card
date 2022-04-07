@@ -63,7 +63,7 @@ const Home = (props) => {
     formData.append("whatsapp", values.whatsapp);
     formData.append("phone", values.phone);
     formData.append("linkedin", values.linkedin);
-    formData.append("file", dataURLtoBlob(image));
+    if (image) formData.append("file", dataURLtoBlob(image));
     await axios
       .post("http://localhost:5000/", formData)
       .then((res) => {

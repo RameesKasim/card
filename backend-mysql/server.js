@@ -5,18 +5,6 @@ const pool = require("./db");
 
 const app = express();
 
-// connect to mysql
-
-// mysql.connect((err) => {
-//   if (err) {
-//     console.log(err);
-//     throw err;
-//   }
-//   console.log("mysql connected");
-// });
-
-//saving profile image to server
-
 var storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./uploads");
@@ -45,37 +33,40 @@ app.post("/", upload.single("file"), async (req, res) => {
     const { name, designation, email, phone, whatsapp, linkedin } = req.body;
     const filename = req.file ? name + ".png" : "";
 
-    pool.getConnection((err, connection) => {
-      connection.query(
-        "INSERT INTO cardtable(name, designation,phone,whatsapp,email,linkedin,profileimage)VALUES (?,?,?,?,?,?,?)",
-        [name, designation, phone, whatsapp, email, linkedin, filename],
-        (err, data) => {
-          res.status(200).json({ name: name });
-          if (err) {
-            console.log(err);
-            const errorString = err.sqlMessage;
-            let msg = "";
-            if (err.errno == 1062) {
-              errorString.includes("name") && (msg = "User already exits");
-              errorString.includes("email") && (msg = "Email already exits");
-              errorString.includes("phone") &&
-                (msg = "Phone number already exits");
-              errorString.includes("whatsapp") &&
-                (msg = "WhatsApp number already exits");
-              errorString.includes("linkedin") &&
-                (msg = "Linkedin id already exits");
-            } else msg = "Data already exist";
-
-            res.status(501).send([
-              {
-                status: "error",
-                message: msg,
-              },
-            ]);
+    try {
+      pool.getConnection((err, connection) => {
+        connection.query(
+          "INSERT INTO cardtable(name, designation,phone,whatsapp,email,linkedin,profileimage)VALUES (?,?,?,?,?,?,?)",
+          [name, designation, phone, whatsapp, email, linkedin, filename],
+          (err, data) => {
+            if (err) {
+               //console.log(err);
+              const errorString = err.sqlMessage;
+              let msg = "";
+              if (err.errno == 1062) {
+                errorString.includes("name") && (msg = "User already exits");
+                errorString.includes("email") && (msg = "Email already exits");
+                errorString.includes("phone") &&
+                  (msg = "Phone number already exits");
+                errorString.includes("whatsapp") &&
+                  (msg = "WhatsApp number already exits");
+                errorString.includes("linkedin") &&
+                  (msg = "Linkedin id already exits");
+              } else msg = "Data already exist";
+              res.status(501).send([
+                {
+                  status: "error",
+                  message: msg,
+                },
+              ]);
+            }
+            if (!err) res.status(200).json({ name: name });
           }
-        }
-      );
-    });
+        );
+      });
+    } catch (error) {
+      console.log(error);
+    }
 
     mycard.email = email;
     mycard.cellPhone = phone;
@@ -87,11 +78,7 @@ app.post("/", upload.single("file"), async (req, res) => {
     req.file && mycard.photo.embedFromFile(`./uploads/${filename}`);
 
     mycard.saveToFile(`./vcards/${name}.vcf`);
-
-    pool.releaseConnection(connection);
-  } catch (error) {
-    // console.log(error);
-  }
+  } catch (err) {}
 });
 
 app.get("/vcard/:name", async (req, res) => {
