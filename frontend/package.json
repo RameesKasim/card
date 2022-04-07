@@ -2,6 +2,7 @@
   "name": "card",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://barracudites.com/",
   "dependencies": {
     "@emotion/react": "^11.8.1",
     "@emotion/styled": "^11.8.1",

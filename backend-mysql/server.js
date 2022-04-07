@@ -1,19 +1,16 @@
+const dotenv = require("dotenv");
+dotenv.config();
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
 const pool = require("./db");
+const config = require("./config");
+
+const { port, allowedDomains } = config;
 
 const app = express();
 
-// connect to mysql
-
-// mysql.connect((err) => {
-//   if (err) {
-//     console.log(err);
-//     throw err;
-//   }
-//   console.log("mysql connected");
-// });
+app.use(cors({ origin: allowedDomains }));
 
 //saving profile image to server
 
@@ -27,8 +24,6 @@ var storage = multer.diskStorage({
 });
 
 const upload = multer({ storage: storage });
-
-app.use(cors());
 
 //generating a static url
 
@@ -105,9 +100,12 @@ app.get("/vcard/:name", async (req, res) => {
 
 //retrieving data
 
+
+
 app.get("/:name", async (req, res) => {
   try {
     const { name } = req.params;
+    console.log(name);
 
     pool.getConnection((err, connection) => {
       connection.query(
@@ -125,6 +123,11 @@ app.get("/:name", async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
+app.get("/", (req, res) => {
+    return res.send("Card Making API")
+});
+
+
+app.listen(port, () => {
   console.log("server started at port 5000");
 });
