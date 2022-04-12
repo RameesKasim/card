@@ -1,7 +1,18 @@
 import { React, useEffect, useState } from "react";
-import { Box, Paper, Button } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Button,
+  Tooltip,
+  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+} from "@mui/material";
 import { makeStyles } from "@mui/styles";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
 import {
   FaPhoneAlt,
@@ -9,12 +20,17 @@ import {
   FaLinkedin,
   FaEnvelope,
   FaMapMarkerAlt,
+  FaLiraSign,
 } from "react-icons/fa";
 import axios from "axios";
 import companyLogo from "../../images/logo.png";
 import defaultImage from "../../images/defaultProfile.png";
 import Loader from "../loader";
 import { saveAs } from "file-saver";
+import { get, endpoint } from "../../utils/apiController";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditButton from "@mui/icons-material/Edit";
+import { Fragment } from "react";
 
 const useStyles = makeStyles({
   paperWrapper: {
@@ -29,6 +45,7 @@ const useStyles = makeStyles({
     padding: "10%",
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
   },
   titleWrapper: {
     padding: "0% 13%",
@@ -125,42 +142,50 @@ const useStyles = makeStyles({
     padding: "0.75rem 0 calc(1.375rem + var(--bottom-safety-height, 0rem))",
     backgroundColor: "#fff9",
   },
+  subMenu: {
+    position: "absolute",
+    top: "0",
+    display: "flex",
+    right: "1rem",
+    padding: "1rem",
+  },
 });
 
 const Card = (props) => {
   const classes = useStyles();
   const name = useParams();
-  const [cardDetails, setCardDetails] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const [cardDetails, setCardDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState();
+  const [loggedIN, setLoggedIn] = useState(false);
   const url = window.location.href;
-  const emailLink = `mailto:${cardDetails.email}`;
-  const whatsappLink = `https:wa.me/${cardDetails.whatsapp}`;
-  const phoneLink = `tel:${cardDetails.phone}`;
-  const linkedinLink = `https:linkedin.com/in/${cardDetails.linkedin}`;
+  const emailLink = cardDetails ? `mailto:${cardDetails.email}` : "";
+  const whatsappLink = cardDetails ? `https:wa.me/${cardDetails.whatsapp}` : "";
+  const phoneLink = cardDetails ? `tel:${cardDetails.phone}` : "";
+  const linkedinLink = cardDetails
+    ? `https:linkedin.com/in/${cardDetails.linkedin}`
+    : "";
   const location = "10th Floor Capricorn Tower, \nSheikh Zayed Road Dubai";
   const locationLink = `http://maps.google.com/maps?q=Capricorn Tower+Dubai`;
 
   useEffect(() => {
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-  }, []);
-
-  useEffect(() => {
-    axios
-      .get(`http://localhost:5000/${name.name}`)
+    setLoggedIn(localStorage.getItem("isLogin"));
+    get(`/card/${name.name}`)
       .then((res) => {
         setCardDetails(res.data);
       })
       .catch((error) => {
-        console.log(error);
+        console.log(error.data);
       });
-  }, []);
+    setTimeout(() => {
+      setIsLoading(false);
+    }, 2000);
+  }, [name]);
 
   const downloadVcard = () => {
-    axios
-      .get(`http://localhost:5000/vcard/${name.name}`)
+    get(`/vcard/${name.name}`)
       .then((res) => {
         let file = new File([res.data], `${name.name}.vcf`, {
           type: "text/plain;charset=utf-8",
@@ -172,105 +197,187 @@ const Card = (props) => {
       });
   };
 
+  const handleDelete = () => {
+    console.log("deleted");
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     <Box className="cardWrapper">
       {isLoading ? (
         <Loader />
       ) : (
-        <Paper elivation={12} className={classes.paperWrapper}>
-          <div className={classes.qrWrapper}>
-            <QRCode value={url} size={150} />
-          </div>
-          <div className={classes.titleWrapper}>
-            <img
-              alt="company logo"
-              src={companyLogo}
-              style={{ width: "100%" }}
-            />
-          </div>
-          <div className={classes.imageWrapper}>
-            <img
-              className={classes.headImage}
-              alt="profile pic"
-              src={
-                cardDetails.profileimage.length
-                  ? `http://localhost:5000/uploads/${cardDetails.profileimage}`
-                  : defaultImage
-              }
-            />
-          </div>
-          <div className={classes.contentWrapper}>
-            <div className={classes.name}>{cardDetails.name}</div>
-            <div className={classes.designation}>{cardDetails.designation}</div>
-            <div className={classes.qualification}></div>
-            <a href={emailLink} className={classes.LinkWrapper}>
-              <div className={classes.iconWrapper}>
-                <FaEnvelope />
+        <Fragment>
+          {cardDetails && (
+            <Paper elivation={12} className={classes.paperWrapper}>
+              <div className={classes.qrWrapper}>
+                <QRCode value={url} size={150} />
+                {loggedIN!=="false" && (
+                  <div className={classes.subMenu}>
+                    <Tooltip title="Edit">
+                      <IconButton
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate(`../card/edit/${cardDetails.card_id}`);
+                        }}
+                      >
+                        <EditButton fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setOpen(true);
+                        }}
+                      >
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Tooltip>
+                    <Dialog
+                      open={open}
+                      onClose={handleClose}
+                      aria-labelledby="draggable-dialog-title"
+                    >
+                      <DialogTitle
+                        style={{ cursor: "move" }}
+                        id="draggable-dialog-title"
+                      >
+                        Delete
+                      </DialogTitle>
+                      <DialogContent>
+                        <DialogContentText>
+                          Are you sure you want to permenently delete this card
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button
+                          autoFocus
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setOpen(false);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleDelete();
+                          }}
+                        >
+                          Delete
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
+                  </div>
+                )}
               </div>
-              <div className={classes.detail}>
-                {cardDetails.email}
-                <div className={classes.subString}>Drop me an email</div>
+              <div className={classes.titleWrapper}>
+                <img
+                  alt="company logo"
+                  src={companyLogo}
+                  style={{ width: "100%" }}
+                />
               </div>
-              {}
-            </a>
-            <a
-              href={whatsappLink}
-              target="_blank"
-              className={classes.LinkWrapper}
-            >
-              <div className={classes.iconWrapper}>
-                <FaWhatsapp />
+              <div className={classes.imageWrapper}>
+                <img
+                  className={classes.headImage}
+                  alt="profile pic"
+                  src={
+                    cardDetails && cardDetails.profileimage.length
+                      ? `${endpoint.dev}/uploads/${cardDetails.profileimage}`
+                      : defaultImage
+                  }
+                />
               </div>
-              <div className={classes.detail}>
-                {cardDetails.whatsapp}
-                <div className={classes.subString}>Whatsapp me</div>
-              </div>
-            </a>
-            <a href={phoneLink} className={classes.LinkWrapper}>
-              <div className={classes.iconWrapper}>
-                <FaPhoneAlt />
-              </div>
-              <div className={classes.detail}>
-                {cardDetails.phone}
-                <div className={classes.subString}>Drop me a line</div>
-              </div>
-            </a>
-            {cardDetails.linkedin.length > 0 && (
-              <a
-                href={linkedinLink}
-                target="_blank"
-                className={classes.LinkWrapper}
-              >
-                <div className={classes.iconWrapper}>
-                  <FaLinkedin />
+              <div className={classes.contentWrapper}>
+                <div className={classes.name}>{cardDetails.name}</div>
+                <div className={classes.designation}>
+                  {cardDetails.designation}
                 </div>
+                <div className={classes.qualification}></div>
+                <a
+                  href={emailLink}
+                  rel="noopener noreferrer"
+                  className={classes.LinkWrapper}
+                >
+                  <div className={classes.iconWrapper}>
+                    <FaEnvelope />
+                  </div>
+                  <div className={classes.detail}>
+                    {cardDetails.email}
+                    <div className={classes.subString}>Drop me an email</div>
+                  </div>
+                  {}
+                </a>
+                <a
+                  href={whatsappLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={classes.LinkWrapper}
+                >
+                  <div className={classes.iconWrapper}>
+                    <FaWhatsapp />
+                  </div>
+                  <div className={classes.detail}>
+                    {cardDetails.whatsapp}
+                    <div className={classes.subString}>Whatsapp me</div>
+                  </div>
+                </a>
+                <a href={phoneLink} className={classes.LinkWrapper}>
+                  <div className={classes.iconWrapper}>
+                    <FaPhoneAlt />
+                  </div>
+                  <div className={classes.detail}>
+                    {cardDetails && cardDetails.phone}
+                    <div className={classes.subString}>Drop me a line</div>
+                  </div>
+                </a>
+                {cardDetails && cardDetails.linkedin.length > 0 && (
+                  <a
+                    href={linkedinLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={classes.LinkWrapper}
+                  >
+                    <div className={classes.iconWrapper}>
+                      <FaLinkedin />
+                    </div>
 
-                <div className={classes.detail}>
-                  {cardDetails.linkedin}
-                  <div className={classes.subString}>Lets connect</div>
-                </div>
-              </a>
-            )}
-            <a
-              href={locationLink}
-              target="_blank"
-              className={classes.LinkWrapper}
-            >
-              <div className={classes.iconWrapper}>
-                <FaMapMarkerAlt />
+                    <div className={classes.detail}>
+                      {cardDetails.linkedin}
+                      <div className={classes.subString}>Lets connect</div>
+                    </div>
+                  </a>
+                )}
+                <a
+                  href={locationLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={classes.LinkWrapper}
+                >
+                  <div className={classes.iconWrapper}>
+                    <FaMapMarkerAlt />
+                  </div>
+                  <div className={classes.detail}>
+                    {location}
+                    <div className={classes.subString}>Visit us</div>
+                  </div>
+                </a>
               </div>
-              <div className={classes.detail}>
-                {location}
-                <div className={classes.subString}>Visit us</div>
+              <div className={classes.btnWrapper}>
+                <Button variant="contained" onClick={downloadVcard}>
+                  Add to Contacts
+                </Button>
               </div>
-            </a>
-          </div>
-          <div className={classes.btnWrapper}>
-            <Button variant="contained" onClick={downloadVcard}>
-              Add to Contacts
-            </Button>
-          </div>
-        </Paper>
+            </Paper>
+          )}
+          {!cardDetails && <div>Details for {name.name} not found </div>}
+        </Fragment>
       )}
     </Box>
   );

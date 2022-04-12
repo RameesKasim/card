@@ -1,8 +1,7 @@
 import { React } from "react";
-import Home from "./components/home";
 import { ThemeProvider, createTheme } from "@mui/material";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Card from "./components/card";
+import Router from "./routes/router";
+import NavBar from "./components/navBar";
 import "./App.scss";
 
 function App() {
@@ -49,12 +48,8 @@ function App() {
   });
   return (
     <ThemeProvider theme={theme}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/:name" element={<Card />} />
-        </Routes>
-      </BrowserRouter>
+      <NavBar />
+      <Router />
     </ThemeProvider>
   );
 }

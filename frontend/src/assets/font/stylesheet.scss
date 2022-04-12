@@ -6,11 +6,42 @@
 @font-face {
   font-family: "AvenirNext";
   src: url("./AvenirNext-DemiBold.woff2") format("woff2");
-  font-weight: 500 ;
+  font-weight: 500;
 }
 
 @font-face {
   font-family: "AvenirNext";
   src: url("./AvenirNext-Medium.woff2") format("woff2");
   font-weight: 300;
+}
+
+.whatsapp .form-control + div:before {
+  content: "Whatsapp";
+  position: absolute;
+  top: -7px;
+  left: 12px;
+  display: block;
+  background: white;
+  padding: 0 5px;
+  font-size: 13px;
+  white-space: nowrap;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: "Prompt", sans-serif;
+  font-weight: 400;
+  font-size: 0.72rem;
+}
+
+.phone .form-control + div:before {
+  content: "Phone";
+  position: absolute;
+  top: -7px;
+  left: 12px;
+  display: block;
+  background: white;
+  padding: 0 5px;
+  color: rgba(0, 0, 0, 0.6);
+  font-family: "Prompt", sans-serif;
+  font-weight: 400;
+  font-size: 0.72rem;
+  white-space: nowrap;
 }

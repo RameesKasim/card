@@ -1,6 +1,7 @@
 {
   "name": "card",
   "version": "0.1.0",
+  "homepage": "http:/barracudites.com",
   "private": true,
   "dependencies": {
     "@emotion/react": "^11.8.1",
@@ -14,12 +15,12 @@
     "axios": "^0.26.0",
     "file-saver": "^2.0.5",
     "formik": "^2.2.9",
-    "mui-phone-number": "^2.2.9",
     "node-sass": "^7.0.1",
     "react": "^17.0.2",
     "react-avatar-editor": "^12.0.0",
     "react-dom": "^17.0.2",
     "react-icons": "^4.3.1",
+    "react-phone-input-2": "^2.15.0",
     "react-qr-code": "^2.0.3",
     "react-redux": "^7.2.6",
     "react-router-dom": "^6.2.2",

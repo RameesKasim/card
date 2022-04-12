@@ -1,9 +1,10 @@
 import { React, Fragment } from "react";
 import { TextField, FormControl, Button } from "@mui/material";
 import { ErrorMessage } from "formik";
-import MuiPhoneNumber from "mui-phone-number";
+import PhoneInput from "react-phone-input-2";
 import defaultUser from "../../assets/defaultUser.jpg";
 import "yup-phone";
+import "react-phone-input-2/lib/material.css";
 
 export const renderInput = ({ field, form, ...props }) => {
   return (
@@ -17,13 +18,19 @@ export const renderInput = ({ field, form, ...props }) => {
 export const renderPhone = ({ field, form, ...props }) => {
   return (
     <Fragment>
-      <MuiPhoneNumber
-        defaultCountry="ae"
+      <PhoneInput
+        country={"ae"}
         variant="outlined"
+        enableAreaCodes={true}
+        prefix={"+"}
         onChange={(value) => {
-          form.setFieldValue(field.name, value);
+          console.log(field, form);
+          form.setFieldValue(field.name, `+${value}`);
         }}
-        {...props}
+        value={field.value}
+        placeholder={field.name}
+        specialLabel=""
+        containerClass={`${props.className} ${field.name}`}
         fullWidth
       />
       <ErrorMessage component="span" className="error" name={field.name} />
