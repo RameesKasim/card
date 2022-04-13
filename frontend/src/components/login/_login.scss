@@ -1,0 +1,16 @@
+.login-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  .mb-5 {
+    margin-bottom: 15px;
+  }
+  .lgn-btn {
+  }
+  .error {
+    color: #d8000c;
+    padding-bottom: 10px;
+    margin-bottom: 10px !important;
+  }
+}
