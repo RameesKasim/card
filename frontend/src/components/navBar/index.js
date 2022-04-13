@@ -17,7 +17,7 @@ const NavBar = () => {
   const open = Boolean(anchorEl);
   const [login, SetLogin] = useState(false);
   const classes = useStyles();
-
+  const origin = window.location.origin;
   useEffect(() => {
     let isLogin = localStorage.getItem("isLogin");
     SetLogin(isLogin);
@@ -34,16 +34,19 @@ const NavBar = () => {
   const handleLogout = () => {
     setAnchorEl(null);
     localStorage.setItem("isLogin", false);
-    SetLogin(false);
     localStorage.removeItem("access-token");
-    let origin = window.location.origin;
     window.location.href = `${origin}/login`;
-    console.log(window.location);
   };
 
   return (
     <Box className={classes.navWrapper}>
-      <IconButton className={classes.IconButton}>
+      <IconButton
+        className={classes.IconButton}
+        onClick={(e) => {
+          e.preventDefault();
+          window.location.href = `${origin}/card/lists`;
+        }}
+      >
         <img alt="company logo" src={companyLogo} style={{ height: "3rem" }} />
       </IconButton>
       {login !== "false" && (

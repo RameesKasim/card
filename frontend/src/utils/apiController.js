@@ -6,7 +6,7 @@ export const endpoint = {
   dev: "http://localhost:5000",
   live: "http://server.barracudites.com",
 };
-const BASE_URL = endpoint.dev;
+const BASE_URL = endpoint.live;
 
 // token interceptors axios
 

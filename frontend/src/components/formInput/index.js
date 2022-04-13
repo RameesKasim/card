@@ -24,7 +24,6 @@ export const renderPhone = ({ field, form, ...props }) => {
         enableAreaCodes={true}
         prefix={"+"}
         onChange={(value) => {
-          console.log(field, form);
           form.setFieldValue(field.name, `+${value}`);
         }}
         value={field.value}
@@ -49,7 +48,6 @@ export const renderImageUpload = ({ field, form, selectedImage, ...props }) => {
         type="file"
         onChange={(event) => {
           props.readURL(event.currentTarget);
-          props.imageSelected();
         }}
       />
       <label htmlFor={props.id}>

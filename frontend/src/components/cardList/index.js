@@ -4,32 +4,37 @@ import {
   Grid,
   Box,
   Card,
-  FormControl,
-  OutlinedInput,
   InputAdornment,
-  InputLabel,
   Pagination,
+  IconButton,
+  TextField,
 } from "@mui/material";
 import { makeStyles } from "@mui/styles";
+import Loader from "../loader";
 import { useNavigate } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
-import { get } from "../../utils/apiController";
+import { get, endpoint } from "../../utils/apiController";
 import defaultImage from "../../images/defaultProfile.png";
+import AddIcon from "@mui/icons-material/Add";
 
 const CardList = (props) => {
   const navigate = useNavigate();
   const classes = useStyles();
+  const [isLoading, setIsLoading] = useState(false);
   const [cardList, setCardList] = useState([]);
   const [totalCards, setTotalCards] = useState(0);
-  const perPage = 10;
+  const [page, setPage] = useState(1);
+  const perPage = 8;
 
   useEffect(() => {
     getCards(1); // defaut 1st page
   }, []);
 
   const getCards = async (page, term = "") => {
+    setIsLoading(true);
     await get(`/cardslist/?page_size=${perPage}&page=${page}&search=${term}`)
       .then((response) => {
+        setIsLoading(false);
         console.log(response.data);
         setCardList(response.data.cardList);
         setTotalCards(response.data.totalCards);
@@ -37,6 +42,7 @@ const CardList = (props) => {
       })
       .catch((e) => {
         console.log(e);
+        setIsLoading(false);
       });
   };
 
@@ -48,25 +54,26 @@ const CardList = (props) => {
   return (
     <Container>
       <Grid container marginTop={2} alignItems="center" spacing={1}>
-        <Grid item xs={4}></Grid>
         <Grid item xs={4}>
           <form>
-            <FormControl fullWidth variant="outlined">
-              <InputLabel>Search</InputLabel>
-              <OutlinedInput
-                onChange={searchCard}
-                endAdornment={
-                  <InputAdornment position="end">
+            <TextField
+              fullWidth
+              variant="outlined"
+              onChange={searchCard}
+              label="Search"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="start">
                     <SearchIcon
                       style={{
-                        padding: "12px",
+                        padding: "6px",
                         color: "rgba(0, 0, 0, 0.54)",
                       }}
                     ></SearchIcon>
                   </InputAdornment>
-                }
-              ></OutlinedInput>
-            </FormControl>
+                ),
+              }}
+            />
           </form>
         </Grid>
         <Grid item xs={4}>
@@ -93,35 +100,63 @@ const CardList = (props) => {
             </Box>
           </Box>
         </Grid>
+        <Grid item xs={4} style={{ display: "flex", justifyContent: "end" }}>
+          <IconButton
+            style={{ fontSize: "small", borderRadius: "0" }}
+            onClick={(e) => {
+              e.preventDefault();
+              navigate("./../add");
+            }}
+          >
+            <AddIcon color="action" fontSize="medium" />
+            Add New Card
+          </IconButton>
+        </Grid>
       </Grid>
       <br />
       <Grid container spacing={2}>
-        {cardList.map((item, i) => (
-          <Grid item xs={3}>
-            <Box mb={2} mt={2} key={i}>
-              <Card
-                className={classes.cardWrapper}
-                elevation={4}
-                onClick={(e) => {
-                  e.preventDefault();
-                  navigate(`../../${item.name}`);
-                }}
-              >
-                <img src={defaultImage} style={{ borderRadius: "50%" }} />
-                <div>{item.name} </div>
-                <div style={{ fontSize: "smaller", fontWeight: "200" }}>
-                  {item.designation}{" "}
-                </div>
-              </Card>
-            </Box>
-          </Grid>
-        ))}
+        {isLoading ? (
+          <Loader />
+        ) : (
+          cardList.map((item, i) => (
+            <Grid item xs={4} md={3} key={i}>
+              <Box mb={2} mt={2} className="cardListWrapper">
+                <Card
+                  className={classes.cardWrapper}
+                  elevation={4}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(`../../${item.name}`);
+                  }}
+                >
+                  <img
+                    src={
+                      item && item.profileimage.length
+                        ? `${endpoint.live}/uploads/${item.profileimage}`
+                        : defaultImage
+                    }
+                    alt="profile-pic"
+                    style={{ borderRadius: "50%" }}
+                  />
+                  <div>{item.name} </div>
+                  <div style={{ fontSize: "smaller", fontWeight: "200" }}>
+                    {item.designation}{" "}
+                  </div>
+                </Card>
+              </Box>
+            </Grid>
+          ))
+        )}
       </Grid>
 
       <Box my={3} style={{ display: "flex", justifyContent: "space-between" }}>
-        {totalCards > 10 && (
+        {totalCards > 8 && (
           <Pagination
-            onChange={(_, index) => getCards(index)}
+            onChange={(_, index) => {
+              getCards(index);
+              setPage(index);
+            }}
+            page={page}
             count={Math.ceil(totalCards / perPage)}
           />
         )}
@@ -137,6 +172,9 @@ const useStyles = makeStyles({
     padding: "1rem",
     textAlign: "center",
     cursor: "pointer",
+    minHeight: "150px",
+    textOverflow: "ellipsis",
+    whiteSpace: " break-spaces",
   },
 });
 

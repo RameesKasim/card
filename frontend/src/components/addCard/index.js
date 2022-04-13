@@ -32,6 +32,7 @@ const AddCard = (props) => {
   const navigate = useNavigate();
   const [idError, setIdError] = useState([]);
   const [image, setImage] = useState("");
+  const [imageChanged, setImageChanged] = useState(null);
   const [open, setOpen] = useState(false);
   const [zoomValue, setZoomValue] = useState(1);
   const [editorImage, setEditorImage] = useState("");
@@ -66,7 +67,7 @@ const AddCard = (props) => {
           });
 
           res.data && res.data.profileimage.length > 0
-            ? setImage(`${endpoint.dev}/uploads/${res.data.profileimage}`)
+            ? setImage(`${endpoint.live}/uploads/${res.data.profileimage}`)
             : setImage("");
         })
         .catch((error) => {
@@ -83,7 +84,8 @@ const AddCard = (props) => {
     formData.append("whatsapp", values.whatsapp);
     formData.append("phone", values.phone);
     formData.append("linkedin", values.linkedin);
-    formData.append("file", image);
+    if (imageChanged) formData.append("file", dataURLtoBlob(image));
+    else formData.append("file", image);
     if (!id) {
       await post(`/card`, formData)
         .then((res) => {
@@ -144,19 +146,15 @@ const AddCard = (props) => {
 
       reader.onload = function (e) {
         setImage(e.target.result);
+        setOpen(true);
+        setImageChanged(true);
       };
 
       reader.readAsDataURL(input.files[0]);
     }
   };
 
-  const imageSelected = () => {
-    setOpen(true);
-  };
-
   const handleClose = () => {
-    let img = dataURLtoBlob(image);
-    setImage(img);
     setOpen(false);
   };
 
@@ -283,7 +281,6 @@ const AddCard = (props) => {
                             id="profileImage"
                             className={classes.formControl}
                             inputClass={classes.hiddenInput}
-                            imageSelected={imageSelected}
                             component={renderImageUpload}
                             readURL={readURL}
                             selectedImage={image}

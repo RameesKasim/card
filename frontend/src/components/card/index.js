@@ -1,4 +1,4 @@
-import { React, useEffect, useState } from "react";
+import { React, useEffect, forwardRef, useState, Fragment } from "react";
 import {
   Box,
   Paper,
@@ -10,7 +10,9 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Snackbar,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import { makeStyles } from "@mui/styles";
 import { useNavigate, useParams } from "react-router-dom";
 import QRCode from "react-qr-code";
@@ -20,17 +22,14 @@ import {
   FaLinkedin,
   FaEnvelope,
   FaMapMarkerAlt,
-  FaLiraSign,
 } from "react-icons/fa";
-import axios from "axios";
 import companyLogo from "../../images/logo.png";
 import defaultImage from "../../images/defaultProfile.png";
 import Loader from "../loader";
 import { saveAs } from "file-saver";
-import { get, endpoint } from "../../utils/apiController";
+import { get, endpoint, deleteReqeust } from "../../utils/apiController";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditButton from "@mui/icons-material/Edit";
-import { Fragment } from "react";
 
 const useStyles = makeStyles({
   paperWrapper: {
@@ -151,11 +150,17 @@ const useStyles = makeStyles({
   },
 });
 
+const Alert = forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 const Card = (props) => {
   const classes = useStyles();
   const name = useParams();
   const [open, setOpen] = useState(false);
+  const [openSnackBar, setOpenSnackBar] = useState(false);
   const navigate = useNavigate();
+  const [image, setImage] = useState(null);
   const [cardDetails, setCardDetails] = useState(null);
   const [isLoading, setIsLoading] = useState();
   const [loggedIN, setLoggedIn] = useState(false);
@@ -175,13 +180,13 @@ const Card = (props) => {
     get(`/card/${name.name}`)
       .then((res) => {
         setCardDetails(res.data);
+        setImage(`${endpoint.live}/uploads/${res.data.profileimage}`);
+        setIsLoading(false);
       })
       .catch((error) => {
+        setIsLoading(false);
         console.log(error.data);
       });
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
   }, [name]);
 
   const downloadVcard = () => {
@@ -198,11 +203,25 @@ const Card = (props) => {
   };
 
   const handleDelete = () => {
+    setOpen(false);
+    deleteReqeust(`/card/${name.name}`)
+      .then((res) => {
+        console.log(res.data);
+        setOpenSnackBar(true);
+        navigate("../card/lists");
+      })
+      .catch((error) => {
+        console.log(error.data);
+      });
     console.log("deleted");
   };
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleCloseSnackBar = () => {
+    setOpenSnackBar(false);
   };
 
   return (
@@ -213,9 +232,22 @@ const Card = (props) => {
         <Fragment>
           {cardDetails && (
             <Paper elivation={12} className={classes.paperWrapper}>
+              <Snackbar
+                open={openSnackBar}
+                autoHideDuration={3000}
+                onClose={handleCloseSnackBar}
+              >
+                <Alert
+                  onClose={handleCloseSnackBar}
+                  severity="success"
+                  sx={{ width: "100%" }}
+                >
+                  Card Deleted!
+                </Alert>
+              </Snackbar>
               <div className={classes.qrWrapper}>
                 <QRCode value={url} size={150} />
-                {loggedIN!=="false" && (
+                {loggedIN !== "false" && (
                   <div className={classes.subMenu}>
                     <Tooltip title="Edit">
                       <IconButton
@@ -287,9 +319,10 @@ const Card = (props) => {
                 <img
                   className={classes.headImage}
                   alt="profile pic"
+                  key={cardDetails.profileimage}
                   src={
                     cardDetails && cardDetails.profileimage.length
-                      ? `${endpoint.dev}/uploads/${cardDetails.profileimage}`
+                      ? image
                       : defaultImage
                   }
                 />

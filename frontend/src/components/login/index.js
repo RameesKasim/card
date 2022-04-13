@@ -24,11 +24,11 @@ const Login = (props) => {
   });
 
   useEffect(() => {
-    if (login) {
-      let origin = window.location.origin;
-      window.location.url = `${origin}/card/lists`;
+    let isLogin = localStorage.getItem("isLogin");
+    if (isLogin === "true") {
+      navigate("/card/lists");
     }
-  }, [error]);
+  }, []);
 
   const handleLogin = async (username, password) => {
     SetLoggingIn(true);
@@ -43,12 +43,13 @@ const Login = (props) => {
         localStorage.setItem("username", res.data.user);
         localStorage.setItem("isLogin", true);
         SetLogin(true);
-        SetError([]);
+        window.location.reload();
       })
       .catch((err) => {
         localStorage.setItem("isLogin", false);
         SetLoggingIn(false);
-        SetError(err.response.data);
+        console.log(err);
+        SetError(err.data);
       });
   };
 
