@@ -47,7 +47,7 @@ const Router = (props) => {
             }
           />
           <Route
-            path="/card/edit/:id"
+            path="/card/edit/:url"
             element={
               <PrivateRoute>
                 <AddCard />

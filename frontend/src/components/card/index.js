@@ -180,7 +180,7 @@ const Card = (props) => {
     get(`/card/${name.name}`)
       .then((res) => {
         setCardDetails(res.data);
-        setImage(`${endpoint.live}/uploads/${res.data.profileimage}`);
+        setImage("data:image/png;base64,".concat(res.data.image));
         setIsLoading(false);
       })
       .catch((error) => {
@@ -204,7 +204,7 @@ const Card = (props) => {
 
   const handleDelete = () => {
     setOpen(false);
-    deleteReqeust(`/card/${name.name}`)
+    deleteReqeust(`/card/${cardDetails.name}`)
       .then((res) => {
         console.log(res.data);
         setOpenSnackBar(true);
@@ -253,7 +253,7 @@ const Card = (props) => {
                       <IconButton
                         onClick={(e) => {
                           e.preventDefault();
-                          navigate(`../card/edit/${cardDetails.card_id}`);
+                          navigate(`../card/edit/${cardDetails.url}`);
                         }}
                       >
                         <EditButton fontSize="small" />
@@ -343,7 +343,7 @@ const Card = (props) => {
                   </div>
                   <div className={classes.detail}>
                     {cardDetails.email}
-                    <div className={classes.subString}>Drop me an email</div>
+                    <div className={classes.subString}>Email me </div>
                   </div>
                   {}
                 </a>
@@ -367,7 +367,7 @@ const Card = (props) => {
                   </div>
                   <div className={classes.detail}>
                     {cardDetails && cardDetails.phone}
-                    <div className={classes.subString}>Drop me a line</div>
+                    <div className={classes.subString}>Call me </div>
                   </div>
                 </a>
                 {cardDetails && cardDetails.linkedin.length > 0 && (

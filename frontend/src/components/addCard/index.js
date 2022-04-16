@@ -27,10 +27,11 @@ const validations = Yup.object().shape({
 const AddCard = (props) => {
   const classes = useStyles();
   const [isLoading, setIsLoading] = useState(true);
-  const { id } = useParams();
+  const { url } = useParams();
+  console.log(url);
   const [initialValues, setInitialValues] = useState(null);
   const navigate = useNavigate();
-  const [idError, setIdError] = useState([]);
+  const [urlError, setUrlError] = useState([]);
   const [image, setImage] = useState("");
   const [imageChanged, setImageChanged] = useState(null);
   const [open, setOpen] = useState(false);
@@ -39,7 +40,7 @@ const AddCard = (props) => {
 
   useEffect(() => {
     setIsLoading(true);
-    if (!id) {
+    if (!url) {
       setImage("");
       setInitialValues({
         name: "",
@@ -52,10 +53,9 @@ const AddCard = (props) => {
       });
       setIsLoading(false);
     } else {
-      get(`/carddetails/${id}`)
+      get(`/card/${url}`)
         .then((res) => {
           setIsLoading(false);
-          console.log(res.data);
           setInitialValues({
             name: res.data.name,
             designation: res.data.designation,
@@ -67,7 +67,7 @@ const AddCard = (props) => {
           });
 
           res.data && res.data.profileimage.length > 0
-            ? setImage(`${endpoint.live}/uploads/${res.data.profileimage}`)
+            ? setImage("data:image/png;base64,".concat(res.data.image))
             : setImage("");
         })
         .catch((error) => {
@@ -86,10 +86,10 @@ const AddCard = (props) => {
     formData.append("linkedin", values.linkedin);
     if (imageChanged) formData.append("file", dataURLtoBlob(image));
     else formData.append("file", image);
-    if (!id) {
+    if (!url) {
       await post(`/card`, formData)
         .then((res) => {
-          navigate(`/${res.data.name}`);
+          navigate(`/${res.data.url}`);
         })
         .catch((error) => {
           const errorMesssage = error.data[0].message;
@@ -103,13 +103,13 @@ const AddCard = (props) => {
             ? actions.setFieldError("whatsapp", errorMesssage)
             : errorMesssage.includes("Linkedin")
             ? actions.setFieldError("linkedin", errorMesssage)
-            : setIdError(error.response.data);
+            : setUrlError(error.response.data);
         });
     }
-    if (id) {
-      await put(`/card/${id}`, formData)
+    if (url) {
+      await put(`/card/${url}`, formData)
         .then((res) => {
-          navigate(`/${res.data.name}`);
+          navigate(`/${res.data.url}`);
         })
         .catch((error) => {
           const errorMesssage = error.data[0].message;
@@ -123,7 +123,7 @@ const AddCard = (props) => {
             ? actions.setFieldError("whatsapp", errorMesssage)
             : errorMesssage.includes("Linkedin")
             ? actions.setFieldError("linkedin", errorMesssage)
-            : setIdError(error.response.data);
+            : setUrlError(error.response.data);
         });
     }
   };
@@ -174,8 +174,8 @@ const AddCard = (props) => {
   };
 
   const handleCancel = () => {
-    if (id) {
-      navigate(`/${initialValues.name}`);
+    if (url) {
+      navigate(`/${url}`);
     } else {
       navigate("/card/lists");
     }
@@ -193,7 +193,7 @@ const AddCard = (props) => {
           validateOnBlur={true}
           enableReinitialize
           onSubmit={(values, actions) => {
-            setIdError([]);
+            setUrlError([]);
             handleSubmit(values, actions);
             actions.setSubmitting(true);
           }}
@@ -323,9 +323,9 @@ const AddCard = (props) => {
                           />
                         </Grid>
                         <Grid item xs={12} sm={12} md={12} lg={12}>
-                          {idError && idError.length > 0 && (
+                          {urlError && urlError.length > 0 && (
                             <div className={classes.error}>
-                              {idError[0].message}
+                              {urlError[0].message}
                             </div>
                           )}
                         </Grid>

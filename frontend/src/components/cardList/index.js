@@ -13,7 +13,7 @@ import { makeStyles } from "@mui/styles";
 import Loader from "../loader";
 import { useNavigate } from "react-router-dom";
 import SearchIcon from "@mui/icons-material/Search";
-import { get, endpoint } from "../../utils/apiController";
+import { get } from "../../utils/apiController";
 import defaultImage from "../../images/defaultProfile.png";
 import AddIcon from "@mui/icons-material/Add";
 
@@ -22,21 +22,31 @@ const CardList = (props) => {
   const classes = useStyles();
   const [isLoading, setIsLoading] = useState(false);
   const [cardList, setCardList] = useState([]);
+  const [imagelist, setImageList] = useState([]);
   const [totalCards, setTotalCards] = useState(0);
   const [page, setPage] = useState(1);
   const perPage = 8;
 
   useEffect(() => {
-    getCards(1); // defaut 1st page
+    getCards(1);
+    // defaut 1st page
   }, []);
+
+  const appentImageList = (imagelist) => {
+    let list = [];
+    imagelist.map((image) => {
+      list.push("data:image/png;base64,".concat(image));
+    });
+    setImageList(list);
+  };
 
   const getCards = async (page, term = "") => {
     setIsLoading(true);
     await get(`/cardslist/?page_size=${perPage}&page=${page}&search=${term}`)
       .then((response) => {
         setIsLoading(false);
-        console.log(response.data);
         setCardList(response.data.cardList);
+        appentImageList(response.data.images);
         setTotalCards(response.data.totalCards);
         window.scrollTo({ top: 0, left: 0, behavior: "smooth" });
       })
@@ -120,24 +130,20 @@ const CardList = (props) => {
         ) : (
           cardList.map((item, i) => (
             <Grid item xs={4} md={3} key={i}>
-              <Box mb={2} mt={2} className="cardListWrapper">
+              <Box mb={2} mt={2}>
                 <Card
-                  className={classes.cardWrapper}
+                  className={`${classes.cardWrapper} cardListWrapper`}
                   elevation={4}
                   onClick={(e) => {
                     e.preventDefault();
-                    navigate(`../../${item.name}`);
+                    navigate(`../../${item.url}`);
                   }}
                 >
-                  <img
-                    src={
-                      item && item.profileimage.length
-                        ? `${endpoint.live}/uploads/${item.profileimage}`
-                        : defaultImage
-                    }
-                    alt="profile-pic"
-                    style={{ borderRadius: "50%" }}
-                  />
+                  {item && item.profileimage.length ? (
+                    <img src={imagelist[i]} alt="profile-pic" />
+                  ) : (
+                    <img src={defaultImage} alt="profile-pic" />
+                  )}
                   <div>{item.name} </div>
                   <div style={{ fontSize: "smaller", fontWeight: "200" }}>
                     {item.designation}{" "}
@@ -172,7 +178,7 @@ const useStyles = makeStyles({
     padding: "1rem",
     textAlign: "center",
     cursor: "pointer",
-    minHeight: "150px",
+    justifyContent: "space-evenly",
     textOverflow: "ellipsis",
     whiteSpace: " break-spaces",
   },

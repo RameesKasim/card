@@ -4,7 +4,7 @@ import axios from "axios";
 
 export const endpoint = {
   dev: "http://localhost:5000",
-  live: "http://server.barracudites.com",
+  live: "https://server.barracudites.com",
 };
 const BASE_URL = endpoint.live;
 
