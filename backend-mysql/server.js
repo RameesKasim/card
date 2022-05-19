@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./.env" });
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const multer = require("multer");
@@ -48,6 +48,7 @@ app.post("/login", upload.fields([]), async (req, res) => {
         "SELECT * FROM barracud_logintable WHERE username=? and password=?",
         [username, password],
         (err, results) => {
+          connection.release();
           console.log(results);
           if (results.length > 0) {
             const id = results[0].id;
@@ -71,20 +72,17 @@ app.post("/login", upload.fields([]), async (req, res) => {
   }
 });
 
-const verifyJWT = async (req, res, next) => {
-  const token = await req.headers["x-access-token"];
+const verifyJWT = (req, res, next) => {
+  const token = req.headers["x-access-token"];
   if (!token) {
     res.status(401).send([
       {
         status: "error",
-        message: "Token not found",
+        message: "Token not find",
       },
     ]);
   } else {
-    console.log("ha");
     jwt.verify(token, process.env.JWT_KEY, (err, decoded) => {
-      console.log("verify");
-      console.log(decoded);
       if (err) {
         console.log(err);
         res.status(401).send([
@@ -105,14 +103,15 @@ const verifyJWT = async (req, res, next) => {
 app.post("/card", verifyJWT, upload.single("file"), async (req, res) => {
   try {
     const mycard = vCardsJS();
-
     const { name, designation, email, phone, whatsapp, linkedin } = req.body;
     const filename = req.file ? name + ".png" : "";
+    const url = await name.split(" ").join("").toLowerCase();
+
     try {
       pool.getConnection((err, connection) => {
         connection.query(
-          "INSERT INTO barracud_cardtable(name, designation,phone,whatsapp,email,linkedin,profileimage)VALUES (?,?,?,?,?,?,?)",
-          [name, designation, phone, whatsapp, email, linkedin, filename],
+          "INSERT INTO barracud_cardtable(url,name, designation,phone,whatsapp,email,linkedin,profileimage)VALUES (?,?,?,?,?,?,?,?)",
+          [url, name, designation, phone, whatsapp, email, linkedin, filename],
           (err, data) => {
             connection.release();
             if (err) {
@@ -149,7 +148,7 @@ app.post("/card", verifyJWT, upload.single("file"), async (req, res) => {
               req.file && mycard.photo.embedFromFile(`./uploads/${filename}`);
 
               mycard.saveToFile(`./vcards/${name}.vcf`);
-              res.status(200).json({ name: name, msg: "Card Added" });
+              res.status(200).json({ url: url, msg: "Card Added" });
             }
           }
         );
@@ -157,9 +156,7 @@ app.post("/card", verifyJWT, upload.single("file"), async (req, res) => {
     } catch (error) {
       console.log(error);
     }
-  } catch (err) {
-    console.log(err);
-  }
+  } catch (err) {}
 });
 
 // getting a card with name
@@ -169,18 +166,30 @@ app.get("/card/:name", async (req, res) => {
     const { name } = req.params;
     pool.getConnection((err, connection) => {
       connection.query(
-        "SELECT * FROM barracud_cardtable where name =  ?",
+        "SELECT * FROM barracud_cardtable where url =  ?",
         [name],
         (err, results) => {
           connection.release();
-          results.length > 0
-            ? res.status(200).json(results[0])
-            : res.status(501).send([
+          if (results.length > 0) {
+            if (results[0].profileimage.length > 0) {
+              const file = fs.readFileSync(
+                `./uploads/${results[0].profileimage}`,
                 {
-                  status: "error",
-                  message: "Data not found",
-                },
-              ]);
+                  encoding: "base64",
+                }
+              );
+              results[0].image = file;
+            } else results[0].image = "";
+
+            res.status(200).json(results[0]);
+          } else {
+            res.status(501).send([
+              {
+                status: "error",
+                message: "Data not found",
+              },
+            ]);
+          }
           if (err) {
             res.status(501).send([
               {
@@ -207,10 +216,25 @@ app.get("/cardslist", verifyJWT, async (req, res, next) => {
     let result = {};
     pool.getConnection((err, connection) => {
       connection.query(
-        "SELECT  name,designation,profileimage FROM barracud_cardtable  WHERE name LIKE ? ORDER BY name LIMIT ?,?",
+        "SELECT  url,name,designation,profileimage FROM barracud_cardtable  WHERE name LIKE ? ORDER BY name LIMIT ?,?",
         [`${search}%`, pageNumber, pageSize],
         (err, results) => {
           if (results) {
+            let images = [];
+            results.map((result) => {
+              if (result.profileimage.length > 0) {
+                const file = fs.readFileSync(
+                  `./uploads/${result.profileimage}`,
+                  {
+                    encoding: "base64",
+                  }
+                );
+                images.push(file);
+              } else {
+                images.push("");
+              }
+            });
+            result.images = images;
             connection.query(
               "SELECT COUNT(1) as total FROM barracud_cardtable  WHERE name LIKE ? ",
               [`${search}%`],
@@ -242,62 +266,39 @@ app.get("/cardslist", verifyJWT, async (req, res, next) => {
         }
       );
     });
-  } catch (error) {
-    console.log(err);
-  }
+  } catch (error) {}
 });
 
-// getting a card with name
+// updating a card with url
 
-app.get("/carddetails/:id", verifyJWT, async (req, res) => {
+app.put("/card/:url", verifyJWT, upload.single("file"), async (req, res) => {
   try {
-    const { id } = req.params;
-    pool.getConnection((err, connection) => {
-      connection.query(
-        "SELECT * FROM barracud_cardtable where card_id = ?",
-        [id],
-        (err, results) => {
-          connection.release();
-          results.length > 0
-            ? res.status(200).json(results[0])
-            : res.status(501).send([
+    const { url } = req.params;
+    const mycard = vCardsJS();
+    const { name, designation, email, phone, whatsapp, linkedin } = req.body;
+    let filename = req.file ? name + ".png" : "";
+    let updateUrl = await name.split(" ").join("").toLowerCase();
+    try {
+      pool.getConnection((err, connection) => {
+        connection.query(
+          "select profileimage from barracud_cardtable where url=?",
+          [url],
+          (err, data) => {
+            if (err) {
+              connection.release();
+              res.status(501).send([
                 {
                   status: "error",
                   message: "Data not found",
                 },
               ]);
-          pool.releaseConnection(connection);
-        }
-      );
-    });
-  } catch (error) {
-    console.log(error);
-  }
-});
-
-// updating a card with id
-
-app.put("/card/:id", verifyJWT, upload.single("file"), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const mycard = vCardsJS();
-    const { name, designation, email, phone, whatsapp, linkedin } = req.body;
-    let filename = req.file ? name + ".png" : "";
-
-    try {
-      pool.getConnection((err, connection) => {
-        connection.query(
-          "select profileimage from barracud_cardtable where card_id=?",
-          [id],
-          (err, data) => {
-            if (err) {
-              connection.release();
             }
             if (data[0].profileimage.length > 0 && !req.file)
               filename = data[0].profileimage;
             connection.query(
-              "UPDATE  barracud_cardtable SET name=?,designation=?,phone=?,whatsapp=?,email=?,linkedin=?,profileimage=? where card_id=?",
+              "UPDATE  barracud_cardtable SET url=?, name=?,designation=?,phone=?,whatsapp=?,email=?,linkedin=?,profileimage=? where url=?",
               [
+                updateUrl,
                 name,
                 designation,
                 phone,
@@ -305,7 +306,7 @@ app.put("/card/:id", verifyJWT, upload.single("file"), async (req, res) => {
                 email,
                 linkedin,
                 filename,
-                id,
+                url,
               ],
               (err, data) => {
                 connection.release();
@@ -345,7 +346,9 @@ app.put("/card/:id", verifyJWT, upload.single("file"), async (req, res) => {
                   req.file &&
                     mycard.photo.embedFromFile(`./uploads/${filename}`);
                   mycard.saveToFile(`./vcards/${name}.vcf`);
-                  res.status(200).json({ name: name, msg: "Card Updated" });
+                  res
+                    .status(200)
+                    .json({ name: name, msg: "Card Updated", url: updateUrl });
                 }
               }
             );
@@ -353,12 +356,9 @@ app.put("/card/:id", verifyJWT, upload.single("file"), async (req, res) => {
         );
       });
     } catch (error) {
-      connection.release();
       console.log(error);
     }
-  } catch (err) {
-    console.log(err);
-  }
+  } catch (err) {}
 });
 
 //deleting a card
@@ -366,6 +366,7 @@ app.put("/card/:id", verifyJWT, upload.single("file"), async (req, res) => {
 app.delete("/card/:name", async (req, res) => {
   try {
     const { name } = req.params;
+    console.log(name);
     app.set("vcf-path", path.join(__dirname, `vcards/${name}.vcf`));
     app.set("image-path", path.join(__dirname, `uploads/${name}.png`));
 
@@ -389,9 +390,7 @@ app.delete("/card/:name", async (req, res) => {
         }
       );
     });
-  } catch (err) {
-    console.log(err);
-  }
+  } catch (err) {}
 });
 
 app.get("/vcard/:name", async (req, res) => {

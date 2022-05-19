@@ -8,7 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { renderImageUpload, renderPhone, renderInput } from "../formInput";
 import Loader from "../loader";
 import AvatarEditor from "react-avatar-editor";
-import { post, get, endpoint, put } from "../../utils/apiController";
+import { post, get, put } from "../../utils/apiController";
 
 const validations = Yup.object().shape({
   name: Yup.string().required("Name required"),

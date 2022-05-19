@@ -3,8 +3,6 @@ import { Formik, Form, Field } from "formik";
 import { Grid, Box, Button } from "@mui/material";
 import * as Yup from "yup";
 import { makeStyles } from "@mui/styles";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { renderInput } from "../formInput";
 import { post } from "../../utils/apiController";
 import { useNavigate } from "react-router-dom";

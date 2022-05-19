@@ -15,7 +15,7 @@ import {
 import MuiAlert from "@mui/material/Alert";
 import { makeStyles } from "@mui/styles";
 import { useNavigate, useParams } from "react-router-dom";
-import QRCode from "react-qr-code";
+import { QRCode } from "react-qrcode-logo";
 import {
   FaPhoneAlt,
   FaWhatsapp,
@@ -27,7 +27,7 @@ import companyLogo from "../../images/logo.png";
 import defaultImage from "../../images/defaultProfile.png";
 import Loader from "../loader";
 import { saveAs } from "file-saver";
-import { get, endpoint, deleteReqeust } from "../../utils/apiController";
+import { get, deleteReqeust } from "../../utils/apiController";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditButton from "@mui/icons-material/Edit";
 
@@ -41,6 +41,7 @@ const useStyles = makeStyles({
   },
   qrWrapper: {
     display: "flex",
+    backgroundColor: "white",
     padding: "10%",
     justifyContent: "center",
     alignItems: "center",
@@ -140,6 +141,9 @@ const useStyles = makeStyles({
     zIndex: "1",
     padding: "0.75rem 0 calc(1.375rem + var(--bottom-safety-height, 0rem))",
     backgroundColor: "#fff9",
+    "& a": {
+      textDecoration: "none",
+    },
   },
   subMenu: {
     position: "absolute",
@@ -166,13 +170,18 @@ const Card = (props) => {
   const [loggedIN, setLoggedIn] = useState(false);
   const url = window.location.href;
   const emailLink = cardDetails ? `mailto:${cardDetails.email}` : "";
-  const whatsappLink = cardDetails ? `https:wa.me/${cardDetails.whatsapp}` : "";
+  const whatsappLink = cardDetails
+    ? `https://wa.me/${cardDetails.whatsapp}`
+    : "";
   const phoneLink = cardDetails ? `tel:${cardDetails.phone}` : "";
   const linkedinLink = cardDetails
-    ? `https:linkedin.com/in/${cardDetails.linkedin}`
+    ? `https://linkedin.com/in/${cardDetails.linkedin}`
     : "";
   const location = "10th Floor Capricorn Tower, \nSheikh Zayed Road Dubai";
   const locationLink = `http://maps.google.com/maps?q=Capricorn Tower+Dubai`;
+  const vcfLink = cardDetails
+    ? `http://server.barracudites.com/vcards/${cardDetails.name}.vcf`
+    : "";
 
   useEffect(() => {
     setIsLoading(true);
@@ -188,19 +197,6 @@ const Card = (props) => {
         console.log(error.data);
       });
   }, [name]);
-
-  const downloadVcard = () => {
-    get(`/vcard/${name.name}`)
-      .then((res) => {
-        let file = new File([res.data], `${name.name}.vcf`, {
-          type: "text/plain;charset=utf-8",
-        });
-        saveAs(file);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
 
   const handleDelete = () => {
     setOpen(false);
@@ -403,9 +399,9 @@ const Card = (props) => {
                 </a>
               </div>
               <div className={classes.btnWrapper}>
-                <Button variant="contained" onClick={downloadVcard}>
-                  Add to Contacts
-                </Button>
+                <a href={vcfLink}>
+                  <Button variant="contained">Add to Contacts</Button>
+                </a>
               </div>
             </Paper>
           )}
