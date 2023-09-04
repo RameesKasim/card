@@ -111,7 +111,7 @@ app.post("/card", verifyJWT, upload.single("file"), async (req, res) => {
     try {
       pool.getConnection((err, connection) => {
         connection.query(
-          "INSERT INTO barracud_cardtable(name, designation,phone,whatsapp,email,linkedin,profileimage)VALUES (?,?,?,?,?,?,?)",
+          "INSERT INTO barracud_cardtable(name, username, designation,phone,whatsapp,email,linkedin,profileimage)VALUES (?,?,?,?,?,?,?,?)",
           [name, username, designation, phone, whatsapp, email, linkedin, filename],
           (err, data) => {
             connection.release();
@@ -149,7 +149,7 @@ app.post("/card", verifyJWT, upload.single("file"), async (req, res) => {
               req.file && mycard.photo.embedFromFile(`./uploads/${filename}`);
 
               mycard.saveToFile(`./vcards/${name}.vcf`);
-              res.status(200).json({ name: name, msg: "Card Added" });
+              res.status(200).json({ name: name, username:username, msg: "Card Added" });
             }
           }
         );
@@ -207,7 +207,7 @@ app.get("/cardslist", verifyJWT, async (req, res, next) => {
     let result = {};
     pool.getConnection((err, connection) => {
       connection.query(
-        "SELECT  name,designation,profileimage FROM barracud_cardtable  WHERE name LIKE ? ORDER BY name LIMIT ?,?",
+        "SELECT  name, username, designation,profileimage FROM barracud_cardtable  WHERE name LIKE ? ORDER BY name LIMIT ?,?",
         [`${search}%`, pageNumber, pageSize],
         (err, results) => {
           if (results) {
@@ -296,9 +296,10 @@ app.put("/card/:id", verifyJWT, upload.single("file"), async (req, res) => {
             if (data[0].profileimage.length > 0 && !req.file)
               filename = data[0].profileimage;
             connection.query(
-              "UPDATE  barracud_cardtable SET name=?,designation=?,phone=?,whatsapp=?,email=?,linkedin=?,profileimage=? where card_id=?",
+              "UPDATE  barracud_cardtable SET name=?, username=?, designation=?,phone=?,whatsapp=?,email=?,linkedin=?,profileimage=? where card_id=?",
               [
                 name,
+                username,
                 designation,
                 phone,
                 whatsapp,
@@ -345,7 +346,7 @@ app.put("/card/:id", verifyJWT, upload.single("file"), async (req, res) => {
                   req.file &&
                     mycard.photo.embedFromFile(`./uploads/${filename}`);
                   mycard.saveToFile(`./vcards/${name}.vcf`);
-                  res.status(200).json({ name: name, msg: "Card Updated" });
+                  res.status(200).json({ name: name, username:username, msg: "Card Updated" });
                 }
               }
             );
@@ -371,7 +372,7 @@ app.delete("/card/:name", async (req, res) => {
 
     pool.getConnection((err, connection) => {
       connection.query(
-        "DELETE FROM  barracud_cardtable where name=?",
+        "DELETE FROM  barracud_cardtable where username=?",
         [name],
         (err, data) => {
           if (err) {
