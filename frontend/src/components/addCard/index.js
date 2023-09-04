@@ -79,7 +79,7 @@ const AddCard = (props) => {
   const handleSubmit = async (values, actions) => {
     let formData = new FormData();
     formData.append("name", values.name);
-    formData.append("username", values.name.replaceAll(' ', ''));
+    formData.append("username", values.name.toLowerCase().replaceAll(' ', ''));
     formData.append("designation", values.designation);
     formData.append("email", values.email);
     formData.append("whatsapp", values.whatsapp);
@@ -90,7 +90,7 @@ const AddCard = (props) => {
     if (!id) {
       await post(`/card`, formData)
         .then((res) => {
-          navigate(`/${res.data.name.replaceAll(' ', '')}`);
+          navigate(`/${res.data.username}`);
         })
         .catch((error) => {
           const errorMesssage = error.data[0].message;
@@ -110,7 +110,7 @@ const AddCard = (props) => {
     if (id) {
       await put(`/card/${id}`, formData)
         .then((res) => {
-          navigate(`/${res.data.name.replaceAll(' ', '')}`);
+          navigate(`/${res.data.username}`);
         })
         .catch((error) => {
           const errorMesssage = error.data[0].message;
@@ -176,7 +176,7 @@ const AddCard = (props) => {
 
   const handleCancel = () => {
     if (id) {
-      navigate(`/${initialValues.name.replaceAll(' ', '')}`);
+      navigate(`/${initialValues.name.toLowerCase().replaceAll(' ', '')}`);
     } else {
       navigate("/card/lists");
     }

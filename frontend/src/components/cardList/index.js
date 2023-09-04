@@ -126,7 +126,7 @@ const CardList = (props) => {
                   elevation={4}
                   onClick={(e) => {
                     e.preventDefault();
-                    navigate(`../../${item.name.replaceAll(' ', '')}`);
+                    navigate(`../../${item.username}`);
                   }}
                 >
                   <img
