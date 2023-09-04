@@ -41,7 +41,7 @@ const NavBar = () => {
   return (
     <Box className={classes.navWrapper}>
       <IconButton
-        className={classes.IconButton}
+        className={`${classes.IconButton} ${classes.homeButton}`}
         onClick={(e) => {
           e.preventDefault();
           window.location.href = `${origin}/card/lists`;
@@ -99,6 +99,11 @@ const useStyles = makeStyles({
   },
   IconButton: {
     padding: "1rem !important",
+  },
+  homeButton: {
+    '&:hover': {
+      borderRadius: 0,
+    }
   },
   MenuItem: {
     width: "10rem",

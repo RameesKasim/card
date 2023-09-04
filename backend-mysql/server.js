@@ -106,13 +106,13 @@ app.post("/card", verifyJWT, upload.single("file"), async (req, res) => {
   try {
     const mycard = vCardsJS();
 
-    const { name, designation, email, phone, whatsapp, linkedin } = req.body;
+    const { name, username, designation, email, phone, whatsapp, linkedin } = req.body;
     const filename = req.file ? name + ".png" : "";
     try {
       pool.getConnection((err, connection) => {
         connection.query(
           "INSERT INTO barracud_cardtable(name, designation,phone,whatsapp,email,linkedin,profileimage)VALUES (?,?,?,?,?,?,?)",
-          [name, designation, phone, whatsapp, email, linkedin, filename],
+          [name, username, designation, phone, whatsapp, email, linkedin, filename],
           (err, data) => {
             connection.release();
             if (err) {
@@ -169,18 +169,18 @@ app.get("/card/:name", async (req, res) => {
     const { name } = req.params;
     pool.getConnection((err, connection) => {
       connection.query(
-        "SELECT * FROM barracud_cardtable where name =  ?",
+        "SELECT * FROM barracud_cardtable where `username` =  ?",
         [name],
         (err, results) => {
           connection.release();
           results.length > 0
             ? res.status(200).json(results[0])
             : res.status(501).send([
-                {
-                  status: "error",
-                  message: "Data not found",
-                },
-              ]);
+              {
+                status: "error",
+                message: "Data not found",
+              },
+            ]);
           if (err) {
             res.status(501).send([
               {
@@ -220,7 +220,7 @@ app.get("/cardslist", verifyJWT, async (req, res, next) => {
                   res.status(501).send([
                     {
                       status: "error",
-                      message: msg,
+                      message: err,
                     },
                   ]);
                 }
@@ -235,7 +235,7 @@ app.get("/cardslist", verifyJWT, async (req, res, next) => {
             res.status(501).send([
               {
                 status: "error",
-                message: msg,
+                message: err,
               },
             ]);
           }
@@ -261,11 +261,11 @@ app.get("/carddetails/:id", verifyJWT, async (req, res) => {
           results.length > 0
             ? res.status(200).json(results[0])
             : res.status(501).send([
-                {
-                  status: "error",
-                  message: "Data not found",
-                },
-              ]);
+              {
+                status: "error",
+                message: "Data not found",
+              },
+            ]);
           pool.releaseConnection(connection);
         }
       );
@@ -281,7 +281,7 @@ app.put("/card/:id", verifyJWT, upload.single("file"), async (req, res) => {
   try {
     const { id } = req.params;
     const mycard = vCardsJS();
-    const { name, designation, email, phone, whatsapp, linkedin } = req.body;
+    const { name, username, designation, email, phone, whatsapp, linkedin } = req.body;
     let filename = req.file ? name + ".png" : "";
 
     try {

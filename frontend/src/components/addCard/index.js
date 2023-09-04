@@ -79,6 +79,7 @@ const AddCard = (props) => {
   const handleSubmit = async (values, actions) => {
     let formData = new FormData();
     formData.append("name", values.name);
+    formData.append("username", values.name.replaceAll(' ', ''));
     formData.append("designation", values.designation);
     formData.append("email", values.email);
     formData.append("whatsapp", values.whatsapp);
@@ -89,41 +90,41 @@ const AddCard = (props) => {
     if (!id) {
       await post(`/card`, formData)
         .then((res) => {
-          navigate(`/${res.data.name}`);
+          navigate(`/${res.data.name.replaceAll(' ', '')}`);
         })
         .catch((error) => {
           const errorMesssage = error.data[0].message;
           errorMesssage.includes("User")
             ? actions.setFieldError("name", errorMesssage)
             : errorMesssage.includes("Email")
-            ? actions.setFieldError("email", errorMesssage)
-            : errorMesssage.includes("Phone")
-            ? actions.setFieldError("phone", errorMesssage)
-            : errorMesssage.includes("WhatsApp")
-            ? actions.setFieldError("whatsapp", errorMesssage)
-            : errorMesssage.includes("Linkedin")
-            ? actions.setFieldError("linkedin", errorMesssage)
-            : setIdError(error.response.data);
+              ? actions.setFieldError("email", errorMesssage)
+              : errorMesssage.includes("Phone")
+                ? actions.setFieldError("phone", errorMesssage)
+                : errorMesssage.includes("WhatsApp")
+                  ? actions.setFieldError("whatsapp", errorMesssage)
+                  : errorMesssage.includes("Linkedin")
+                    ? actions.setFieldError("linkedin", errorMesssage)
+                    : setIdError(error.response.data);
         });
     }
     if (id) {
       await put(`/card/${id}`, formData)
         .then((res) => {
-          navigate(`/${res.data.name}`);
+          navigate(`/${res.data.name.replaceAll(' ', '')}`);
         })
         .catch((error) => {
           const errorMesssage = error.data[0].message;
           errorMesssage.includes("User")
             ? actions.setFieldError("name", errorMesssage)
             : errorMesssage.includes("Email")
-            ? actions.setFieldError("email", errorMesssage)
-            : errorMesssage.includes("Phone")
-            ? actions.setFieldError("phone", errorMesssage)
-            : errorMesssage.includes("WhatsApp")
-            ? actions.setFieldError("whatsapp", errorMesssage)
-            : errorMesssage.includes("Linkedin")
-            ? actions.setFieldError("linkedin", errorMesssage)
-            : setIdError(error.response.data);
+              ? actions.setFieldError("email", errorMesssage)
+              : errorMesssage.includes("Phone")
+                ? actions.setFieldError("phone", errorMesssage)
+                : errorMesssage.includes("WhatsApp")
+                  ? actions.setFieldError("whatsapp", errorMesssage)
+                  : errorMesssage.includes("Linkedin")
+                    ? actions.setFieldError("linkedin", errorMesssage)
+                    : setIdError(error.response.data);
         });
     }
   };
@@ -175,7 +176,7 @@ const AddCard = (props) => {
 
   const handleCancel = () => {
     if (id) {
-      navigate(`/${initialValues.name}`);
+      navigate(`/${initialValues.name.replaceAll(' ', '')}`);
     } else {
       navigate("/card/lists");
     }

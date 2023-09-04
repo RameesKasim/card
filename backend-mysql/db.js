@@ -2,9 +2,9 @@ const mysql = require("mysql2");
 
 const server = {
   password: "b71~phWLitYa",
-  user: "barracud_user",
+  user: "barracud_card_user",
   host: "localhost",
-  database: "barracud_database",
+  database: "barracud_card_db",
 };
 
 const local = {
@@ -15,10 +15,10 @@ const local = {
 };
 
 const pool = mysql.createPool({
-  user: local.user, //db user
-  password: local.password, // db password
-  host: local.host, // db host adress
-  database: local.database, // database name
+  user: server.user, //db user
+  password: server.password, // db password
+  host: server.host, // db host adress
+  database: server.database, // database name
   debug: false,
   waitForConnections: true,
   connectionLimit: 10,
